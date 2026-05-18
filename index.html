@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Diário de Sono e Rotina da Maya</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --ink:#1f2937;
+      --muted:#6b7280;
+      --line:#d9e1ec;
+      --brand:#2563eb;
+      --brand2:#0f766e;
+      --danger:#b91c1c;
+      --warn:#92400e;
+      --ok:#166534;
+      --soft:#eef4ff;
+      --shadow:0 12px 30px rgba(15,23,42,.08);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.10), transparent 32rem),
+        radial-gradient(circle at top right, rgba(15,118,110,.10), transparent 28rem),
+        var(--bg);
+      line-height:1.45;
+    }
+    header{
+      padding:28px 18px 16px;
+      max-width:1180px;
+      margin:0 auto;
+    }
+    .topbar{
+      display:flex;
+      gap:16px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    h1{
+      margin:0;
+      font-size:clamp(1.45rem, 2.4vw, 2.35rem);
+      letter-spacing:-.03em;
+    }
+    .subtitle{
+      margin:8px 0 0;
+      color:var(--muted);
+      max-width:850px;
+    }
+    .badge{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:10px 14px;
+      box-shadow:var(--shadow);
+      font-weight:700;
+      color:var(--brand);
+      white-space:nowrap;
+    }
+    main{
+      max-width:1180px;
+      margin:0 auto;
+      padding:0 18px 42px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:18px;
+    }
+    @media(min-width:920px){
+      .grid.two{grid-template-columns:1fr 1fr}
+      .grid.three{grid-template-columns:repeat(3, 1fr)}
+    }
+    .card{
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+      backdrop-filter: blur(10px);
+    }
+    .card h2{
+      margin:0 0 12px;
+      font-size:1.14rem;
+      letter-spacing:-.01em;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .card h3{
+      margin:14px 0 8px;
+      font-size:1rem;
+    }
+    label{
+      display:block;
+      font-size:.9rem;
+      font-weight:700;
+      margin:10px 0 5px;
+    }
+    .hint{
+      color:var(--muted);
+      font-size:.83rem;
+      margin-top:4px;
+    }
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+      padding:10px 12px;
+      font-size:1rem;
+      color:var(--ink);
+      outline:none;
+    }
+    input:focus, select:focus, textarea:focus{
+      border-color:var(--brand);
+      box-shadow:0 0 0 3px rgba(37,99,235,.12);
+    }
+    textarea{min-height:92px; resize:vertical}
+    .row{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    @media(min-width:680px){
+      .row.cols-2{grid-template-columns:1fr 1fr}
+      .row.cols-3{grid-template-columns:repeat(3, 1fr)}
+      .row.cols-4{grid-template-columns:repeat(4, 1fr)}
+    }
+    .checkgrid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:8px;
+      margin-top:8px;
+    }
+    @media(min-width:680px){ .checkgrid{grid-template-columns:repeat(2,1fr)} }
+    @media(min-width:1020px){ .checkgrid{grid-template-columns:repeat(3,1fr)} }
+    .check{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 10px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+      min-height:42px;
+    }
+    .check input{width:auto; margin:0}
+    .check label{margin:0; font-weight:600; font-size:.9rem}
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+    button, .button{
+      border:0;
+      border-radius:12px;
+      padding:11px 15px;
+      font-weight:800;
+      font-size:.95rem;
+      cursor:pointer;
+      background:var(--brand);
+      color:#fff;
+      box-shadow:0 8px 18px rgba(37,99,235,.18);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    button.secondary{background:#334155; box-shadow:none}
+    button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+    button.danger{background:var(--danger);box-shadow:none}
+    button.ok{background:var(--ok);box-shadow:none}
+    .summary{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    @media(min-width:760px){ .summary{grid-template-columns:repeat(4,1fr)} }
+    .metric{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      background:var(--soft);
+    }
+    .metric span{
+      display:block;
+      color:var(--muted);
+      font-size:.78rem;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+    .metric strong{
+      display:block;
+      font-size:1.35rem;
+      margin-top:4px;
+    }
+    .status{
+      margin-top:12px;
+      border-radius:12px;
+      padding:11px 12px;
+      font-weight:700;
+      display:none;
+    }
+    .status.show{display:block}
+    .status.ok{background:#dcfce7;color:#14532d;border:1px solid #bbf7d0}
+    .status.warn{background:#fef3c7;color:#78350f;border:1px solid #fde68a}
+    .status.err{background:#fee2e2;color:#7f1d1d;border:1px solid #fecaca}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:.9rem;
+      margin-top:10px;
+      overflow:hidden;
+      border-radius:12px;
+    }
+    th,td{
+      border-bottom:1px solid var(--line);
+      padding:9px;
+      text-align:left;
+      vertical-align:top;
+    }
+    th{background:#f8fafc;color:#334155;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+    .small{font-size:.84rem;color:var(--muted)}
+    .divider{height:1px;background:var(--line);margin:16px 0}
+    .pill{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#e0f2fe;
+      color:#075985;
+      font-size:.78rem;
+      font-weight:800;
+      margin:2px 4px 2px 0;
+    }
+    .print-note{display:none}
+    iframe[name="hiddenSubmitFrame"]{display:none}
+    @media print{
+      body{background:#fff}
+      header, main{max-width:none}
+      .actions,.no-print,.status{display:none!important}
+      .card{box-shadow:none;break-inside:avoid}
+      .print-note{display:block}
+      input,select,textarea{border:1px solid #999}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div>
+        <h1>Diário de Sono e Rotina da Maya</h1>
+        <p class="subtitle">
+          Registro objetivo de 14 dias para entender gatilhos de sono agitado, ansiedade antecipatória,
+          atividade física, alimentação, telas e episódios noturnos.
+        </p>
+      </div>
+      <div class="badge" id="badgeDia">Dia 1 de 14</div>
+    </div>
+  </header>
+
+  <main>
+    <div class="card no-print">
+      <h2>⚙️ Configuração de envio para Google Sheets</h2>
+      <p class="small">
+        O link CSV da planilha é usado apenas para consulta/leitura. Para gravar dados online, cole abaixo a URL do
+        Web App do Google Apps Script depois de publicar o script entregue junto com este HTML.
+      </p>
+      <div class="row cols-2">
+        <div>
+          <label for="scriptUrl">URL do Google Apps Script Web App</label>
+          <input id="scriptUrl" value="https://script.google.com/macros/s/AKfycbyKHVUSLoofnQWgKCiTL4iKctDLf6z11Sf8wptVBO5mz4Icbe_-246hGfpERjhcHNS2/exec" placeholder="https://script.google.com/macros/s/SEU_ID/exec" />
+        </div>
+        <div>
+          <label for="csvUrl">Link CSV publicado da planilha</label>
+          <input id="csvUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSWnpuJrUrL4ijLBYJ7DiurlxINsrSBNYHfcz3RfDjZg6nJ0UtQM8HhBFDlwWGx9Udl5Dc6NfzHgux0/pub?gid=0&single=true&output=csv" />
+        </div>
+      </div>
+      <div class="row cols-3">
+        <div>
+          <label for="startDate">Data inicial do acompanhamento</label>
+          <input id="startDate" type="date" />
+          <div class="hint">Usado para calcular automaticamente Dia 1 a Dia 14.</div>
+        </div>
+        <div>
+          <label for="childInitial">Identificação da criança</label>
+          <input id="childInitial" value="Maya" />
+          <div class="hint">Evite dados sensíveis desnecessários.</div>
+        </div>
+        <div>
+          <label for="routineTarget">Meta de horário para dormir</label>
+          <input id="routineTarget" type="time" value="20:30" />
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" onclick="saveSettings()">💾 Salvar configuração</button>
+        <button type="button" class="ghost" onclick="setTodayAsStart()">📅 Hoje é Dia 1</button>
+        <button type="button" class="ghost" onclick="loadCsvPreview()">📊 Carregar registros da planilha</button>
+        <button type="button" class="ghost" onclick="window.print()">🖨️ Imprimir página atual</button>
+      </div>
+      <div id="configStatus" class="status"></div>
+    </div>
+
+    <form id="sleepForm" autocomplete="on">
+      <input type="hidden" name="payload" id="payload" />
+      <iframe name="hiddenSubmitFrame" id="hiddenSubmitFrame"></iframe>
+
+      <section class="card">
+        <h2>📅 Identificação do dia</h2>
+        <div class="row cols-4">
+          <div>
+            <label for="data_registro">Data do registro</label>
+            <input id="data_registro" name="data_registro" type="date" required />
+          </div>
+          <div>
+            <label for="dia_acompanhamento">Dia do acompanhamento</label>
+            <input id="dia_acompanhamento" name="dia_acompanhamento" readonly />
+          </div>
+          <div>
+            <label for="dia_semana">Dia da semana</label>
+            <input id="dia_semana" name="dia_semana" readonly />
+          </div>
+          <div>
+            <label for="responsavel">Responsável pelo preenchimento</label>
+            <input id="responsavel" name="responsavel" placeholder="Pai, mãe, avó..." />
+          </div>
+        </div>
+      </section>
+
+      <div class="grid two">
+        <section class="card">
+          <h2>🌞 Rotina do dia</h2>
+          <div class="row cols-2">
+            <div>
+              <label for="teve_escola">Teve escola?</label>
+              <select id="teve_escola" name="teve_escola">
+                <option value="">Selecionar</option>
+                <option>Sim</option>
+                <option>Não</option>
+                <option>Férias</option>
+                <option>Final de semana</option>
+              </select>
+            </div>
+            <div>
+              <label for="humor_dia">Humor geral do dia</label>
+              <select id="humor_dia" name="humor_dia">
+                <option value="">Selecionar</option>
+                <option>Muito tranquila</option>
+                <option>Tranquila</option>
+                <option>Normal</option>
+                <option>Agitada</option>
+                <option>Muito agitada</option>
+              </select>
+            </div>
+          </div>
+
+          <label for="atividades_principais">O que fez de mais relevante?</label>
+          <textarea id="atividades_principais" name="atividades_principais" placeholder="Ex.: escola, casa da avó, parque, viagem, festa, consulta, mudança de rotina..."></textarea>
+
+          <div class="row cols-2">
+            <div>
+              <label for="nivel_ansiedade">Ansiedade/antecipação do dia</label>
+              <select id="nivel_ansiedade" name="nivel_ansiedade">
+                <option value="">Selecionar</option>
+                <option>0 - Não percebi</option>
+                <option>1 - Leve</option>
+                <option>2 - Moderada</option>
+                <option>3 - Alta</option>
+                <option>4 - Muito alta</option>
+                <option>5 - Crise/choros intensos</option>
+              </select>
+            </div>
+            <div>
+              <label for="perguntou_amanha">Perguntou muito sobre o dia seguinte?</label>
+              <select id="perguntou_amanha" name="perguntou_amanha">
+                <option value="">Selecionar</option>
+                <option>Não</option>
+                <option>Pouco</option>
+                <option>Moderado</option>
+                <option>Muito</option>
+                <option>Repetidamente</option>
+              </select>
+            </div>
+          </div>
+          <label for="gatilho_emocional">Algum gatilho emocional?</label>
+          <textarea id="gatilho_emocional" name="gatilho_emocional" placeholder="Ex.: mudança de rotina, medo, saudade, briga, frustração, expectativa de passeio..."></textarea>
+        </section>
+
+        <section class="card">
+          <h2>🏃 Atividade física e corpo</h2>
+          <div class="row cols-3">
+            <div>
+              <label for="atividade_fisica">Fez atividade física?</label>
+              <select id="atividade_fisica" name="atividade_fisica">
+                <option value="">Selecionar</option>
+                <option>Não</option>
+                <option>Sim - leve</option>
+                <option>Sim - moderada</option>
+                <option>Sim - intensa</option>
+              </select>
+            </div>
+            <div>
+              <label for="tempo_atividade_min">Duração total</label>
+              <input id="tempo_atividade_min" name="tempo_atividade_min" type="number" min="0" step="5" placeholder="minutos" />
+            </div>
+            <div>
+              <label for="horario_atividade">Horário principal</label>
+              <input id="horario_atividade" name="horario_atividade" type="time" />
+            </div>
+          </div>
+          <label for="tipo_atividade">Tipo de atividade</label>
+          <input id="tipo_atividade" name="tipo_atividade" placeholder="Ex.: bicicleta, caminhada, parquinho, natação, dança..." />
+
+          <div class="row cols-2">
+            <div>
+              <label for="cochilo">Cochilou durante o dia?</label>
+              <select id="cochilo" name="cochilo">
+                <option value="">Selecionar</option>
+                <option>Não</option>
+                <option>Sim - até 30 min</option>
+                <option>Sim - 30 a 60 min</option>
+                <option>Sim - mais de 60 min</option>
+              </select>
+            </div>
+            <div>
+              <label for="horario_cochilo">Horário do cochilo</label>
+              <input id="horario_cochilo" name="horario_cochilo" placeholder="Ex.: 14:00 às 14:40" />
+            </div>
+          </div>
+
+          <label for="sinais_corpo">Sinais físicos percebidos</label>
+          <textarea id="sinais_corpo" name="sinais_corpo" placeholder="Ex.: muita energia, cansaço extremo, pernas inquietas, dor, nariz entupido, tosse, ronco, febre..."></textarea>
+        </section>
+      </div>
+
+      <div class="grid two">
+        <section class="card">
+          <h2>📺 Tela, estímulos e rotina pré-sono</h2>
+          <div class="row cols-4">
+            <div>
+              <label for="tela_inicio">Tela início</label>
+              <input id="tela_inicio" name="tela_inicio" type="time" />
+            </div>
+            <div>
+              <label for="tela_fim">Tela fim</label>
+              <input id="tela_fim" name="tela_fim" type="time" />
+            </div>
+            <div>
+              <label for="tempo_tela_auto">Tempo de tela</label>
+              <input id="tempo_tela_auto" name="tempo_tela_auto" readonly placeholder="auto" />
+            </div>
+            <div>
+              <label for="tela_tipo">Tipo de conteúdo</label>
+              <select id="tela_tipo" name="tela_tipo">
+                <option value="">Selecionar</option>
+                <option>Sem tela</option>
+                <option>Desenho calmo</option>
+                <option>Desenho agitado</option>
+                <option>Filme</option>
+                <option>Jogo</option>
+                <option>Outro</option>
+              </select>
+            </div>
+          </div>
+          <div class="row cols-2">
+            <div>
+              <label for="musica_calma">Usou música calma?</label>
+              <select id="musica_calma" name="musica_calma">
+                <option value="">Selecionar</option>
+                <option>Não</option>
+                <option>Sim - pouco tempo</option>
+                <option>Sim - até dormir</option>
+                <option>Sim - ficou tocando depois</option>
+              </select>
+            </div>
+            <div>
+              <label for="mapa_amanha">Fez “mapa do amanhã”?</label>
+              <select id="mapa_amanha" name="mapa_amanha">
+                <option value="">Selecionar</option>
+                <option>Não</option>
+                <option>Sim - verbal</option>
+                <option>Sim - visual/desenho</option>
+                <option>Sim - mas gerou mais perguntas</option>
+              </select>
+            </div>
+          </div>
+          <label for="rotina_pre_sono">Rotina antes de dormir</label>
+          <textarea id="rotina_pre_sono" name="rotina_pre_sono" placeholder="Ex.: banho, pijama, história, oração, conversa curta, luz baixa..."></textarea>
+        </section>
+
+        <section class="card">
+          <h2>🍽️ Alimentação e ingestão</h2>
+          <div class="row cols-2">
+            <div>
+              <label for="jantar_horario">Horário do jantar</label>
+              <input id="jantar_horario" name="jantar_horario" type="time" />
+            </div>
+            <div>
+              <label for="jantar_quantidade">Quantidade no jantar</label>
+              <select id="jantar_quantidade" name="jantar_quantidade">
+                <option value="">Selecionar</option>
+                <option>Comeu bem</option>
+                <option>Comeu médio</option>
+                <option>Comeu pouco</option>
+                <option>Recusou comida</option>
+                <option>Jantou fora da rotina</option>
+              </select>
+            </div>
+          </div>
+          <label for="alimentos_relevantes">O que comeu de relevante?</label>
+          <textarea id="alimentos_relevantes" name="alimentos_relevantes" placeholder="Ex.: arroz/feijão/carne, massa, leite, chocolate, açúcar, refrigerante, suco, comida pesada..."></textarea>
+          <div class="row cols-2">
+            <div>
+              <label for="doce_chocolate">Teve doce/chocolate à tarde/noite?</label>
+              <select id="doce_chocolate" name="doce_chocolate">
+                <option value="">Selecionar</option>
+                <option>Não</option>
+                <option>Sim - pouco</option>
+                <option>Sim - moderado</option>
+                <option>Sim - muito</option>
+              </select>
+            </div>
+            <div>
+              <label for="medicacao">Medicação/suplemento no dia</label>
+              <input id="medicacao" name="medicacao" placeholder="Somente se prescrito/orientado. Ex.: antialérgico..." />
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="card">
+        <h2>🌙 Sono da noite</h2>
+        <div class="row cols-4">
+          <div>
+            <label for="foi_cama">Foi para cama</label>
+            <input id="foi_cama" name="foi_cama" type="time" />
+          </div>
+          <div>
+            <label for="dormiu_hora">Dormiu de fato</label>
+            <input id="dormiu_hora" name="dormiu_hora" type="time" />
+          </div>
+          <div>
+            <label for="acordou_hora">Acordou de manhã</label>
+            <input id="acordou_hora" name="acordou_hora" type="time" />
+          </div>
+          <div>
+            <label for="total_sono_auto">Total aproximado</label>
+            <input id="total_sono_auto" name="total_sono_auto" readonly placeholder="auto" />
+          </div>
+        </div>
+
+        <div class="summary">
+          <div class="metric">
+            <span>Sugestão de despertar leve</span>
+            <strong id="despertarSugerido">--:--</strong>
+            <div class="small">~25 min antes da janela de 2h</div>
+          </div>
+          <div class="metric">
+            <span>Janela crítica estimada</span>
+            <strong id="janelaCritica">--:--</strong>
+            <div class="small">Aprox. 2h depois de dormir</div>
+          </div>
+          <div class="metric">
+            <span>Meta de sono pré-escolar</span>
+            <strong>10–13h</strong>
+            <div class="small">Referência geral por idade</div>
+          </div>
+          <div class="metric">
+            <span>Status do registro</span>
+            <strong id="statusRegistro">Aberto</strong>
+            <div class="small">Salve no fim da manhã seguinte</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>⚠️ Episódio noturno / agitação</h2>
+        <div class="row cols-4">
+          <div>
+            <label for="teve_episodio">Teve episódio?</label>
+            <select id="teve_episodio" name="teve_episodio">
+              <option value="">Selecionar</option>
+              <option>Não</option>
+              <option>Sim - leve</option>
+              <option>Sim - moderado</option>
+              <option>Sim - intenso</option>
+            </select>
+          </div>
+          <div>
+            <label for="episodio_hora">Horário do episódio</label>
+            <input id="episodio_hora" name="episodio_hora" type="time" />
+          </div>
+          <div>
+            <label for="episodio_duracao">Duração aproximada</label>
+            <input id="episodio_duracao" name="episodio_duracao" placeholder="Ex.: 5 min, 20 min" />
+          </div>
+          <div>
+            <label for="lembrou_manha">Lembrou no dia seguinte?</label>
+            <select id="lembrou_manha" name="lembrou_manha">
+              <option value="">Selecionar</option>
+              <option>Não</option>
+              <option>Pouco</option>
+              <option>Sim</option>
+              <option>Não perguntamos</option>
+            </select>
+          </div>
+        </div>
+
+        <label>O que aconteceu? Marque os sinais observados.</label>
+        <div class="checkgrid">
+          <div class="check"><input type="checkbox" name="sinais_episodio" value="Resmungou" id="s1"><label for="s1">Resmungou</label></div>
+          <div class="check"><input type="checkbox" name="sinais_episodio" value="Chorou" id="s2"><label for="s2">Chorou</label></div>
+          <div class="check"><input type="checkbox" name="sinais_episodio" value="Sentou na cama" id="s3"><label for="s3">Sentou na cama</label></div>
+          <div class="check"><input type="checkbox" name="sinais_episodio" value="Levantou" id="s4"><label for="s4">Levantou</label></div>
+          <div class="check"><input type="checkbox" name="sinais_episodio" value="Veio ao quarto dos pais" id="s5"><label for="s5">Veio ao quarto dos pais</label></div>
+          <div class="check"><input type="checkbox" name="sinais_episodio" value="Parecia sonâmbula/confusa" id="s6"><label for="s6">Parecia sonâmbula/confusa</label></div>
+          <div class="check"><input type="checkbox" name="sinais_episodio" value="Bateu pé/pernas" id="s7"><label for="s7">Bateu pé/pernas</label></div>
+          <div class="check"><input type="checkbox" name="sinais_episodio" value="Suou muito" id="s8"><label for="s8">Suou muito</label></div>
+          <div class="check"><input type="checkbox" name="sinais_episodio" value="Ronco/respiração alterada" id="s9"><label for="s9">Ronco/respiração alterada</label></div>
+        </div>
+
+        <div class="row cols-3">
+          <div>
+            <label for="intervencao">Como vocês agiram?</label>
+            <select id="intervencao" name="intervencao">
+              <option value="">Selecionar</option>
+              <option>Não precisamos intervir</option>
+              <option>Conduzimos de volta à cama</option>
+              <option>Falamos pouco e acalmamos</option>
+              <option>Deitamos junto até acalmar</option>
+              <option>Levamos para nosso quarto</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div>
+            <label for="despertar_programado_feito">Fez despertar programado?</label>
+            <select id="despertar_programado_feito" name="despertar_programado_feito">
+              <option value="">Selecionar</option>
+              <option>Não</option>
+              <option>Sim - mexeu/tocou levemente</option>
+              <option>Sim - acordou um pouco</option>
+              <option>Sim - não funcionou</option>
+            </select>
+          </div>
+          <div>
+            <label for="impacto_pais">Impacto no sono dos pais</label>
+            <select id="impacto_pais" name="impacto_pais">
+              <option value="">Selecionar</option>
+              <option>Sem impacto</option>
+              <option>Leve</option>
+              <option>Moderado</option>
+              <option>Alto</option>
+              <option>Muito alto</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="observacoes_noite">Observações da noite</label>
+        <textarea id="observacoes_noite" name="observacoes_noite" placeholder="Descreva somente pontos objetivos. Ex.: acordou confusa, chorou 10 min, não respondeu, voltou sozinha, etc."></textarea>
+      </section>
+
+      <section class="card">
+        <h2>📌 Resumo para análise</h2>
+        <div class="row cols-2">
+          <div>
+            <label for="possivel_gatilho">O que pode ter influenciado?</label>
+            <textarea id="possivel_gatilho" name="possivel_gatilho" placeholder="Ex.: dia muito cheio, pouca atividade física, muita ansiedade, tela mais tarde, comeu pouco, rotina diferente..."></textarea>
+          </div>
+          <div>
+            <label for="acao_teste_proximo_dia">Ação para testar no próximo dia</label>
+            <textarea id="acao_teste_proximo_dia" name="acao_teste_proximo_dia" placeholder="Ex.: bicicleta mais cedo, mapa visual do amanhã, despertar programado, reduzir doce, dormir 20 min mais cedo..."></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="ok" onclick="saveAndSend()">✅ Salvar e enviar para planilha</button>
+          <button type="button" class="secondary" onclick="saveLocalOnly()">💾 Salvar somente neste navegador</button>
+          <button type="button" class="ghost" onclick="exportLocalCsv()">⬇️ Exportar registros locais em CSV</button>
+          <button type="button" class="ghost" onclick="clearFormKeepConfig()">🧹 Limpar formulário</button>
+          <button type="button" class="danger" onclick="clearLocalRecords()">🗑️ Apagar registros locais</button>
+        </div>
+        <div id="formStatus" class="status"></div>
+      </section>
+    </form>
+
+    <section class="card no-print">
+      <h2>📊 Registros salvos localmente</h2>
+      <p class="small">Estes dados ficam neste navegador como cópia de segurança. O envio para a planilha depende do Google Apps Script configurado.</p>
+      <div id="localRecords"></div>
+      <div id="csvPreview"></div>
+    </section>
+  </main>
+
+<script>
+const STORAGE_SETTINGS = "mayaSonoSettings_v1";
+const STORAGE_RECORDS = "mayaSonoRecords_v1";
+
+const FIELD_IDS = [
+  "data_registro","dia_acompanhamento","dia_semana","responsavel",
+  "teve_escola","humor_dia","atividades_principais","nivel_ansiedade","perguntou_amanha","gatilho_emocional",
+  "atividade_fisica","tempo_atividade_min","horario_atividade","tipo_atividade","cochilo","horario_cochilo","sinais_corpo",
+  "tela_inicio","tela_fim","tempo_tela_auto","tela_tipo","musica_calma","mapa_amanha","rotina_pre_sono",
+  "jantar_horario","jantar_quantidade","alimentos_relevantes","doce_chocolate","medicacao",
+  "foi_cama","dormiu_hora","acordou_hora","total_sono_auto",
+  "teve_episodio","episodio_hora","episodio_duracao","lembrou_manha","intervencao","despertar_programado_feito","impacto_pais",
+  "observacoes_noite","possivel_gatilho","acao_teste_proximo_dia"
+];
+
+function pad(n){ return String(n).padStart(2,"0"); }
+function todayISO(){
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function parseISODate(value){
+  if(!value) return null;
+  const [y,m,d] = value.split("-").map(Number);
+  return new Date(y, m-1, d);
+}
+function dateDiffDays(a,b){
+  const ms = parseISODate(b) - parseISODate(a);
+  return Math.floor(ms / 86400000);
+}
+function weekdayBR(value){
+  const d = parseISODate(value);
+  if(!d) return "";
+  return d.toLocaleDateString("pt-BR", {weekday:"long"});
+}
+function timeToMinutes(t){
+  if(!t || !/^\d{2}:\d{2}$/.test(t)) return null;
+  const [h,m]=t.split(":").map(Number);
+  return h*60+m;
+}
+function minutesToTime(mins){
+  if(mins == null || Number.isNaN(mins)) return "--:--";
+  mins = ((mins % 1440)+1440)%1440;
+  return `${pad(Math.floor(mins/60))}:${pad(mins%60)}`;
+}
+function diffTime(start,end){
+  const a=timeToMinutes(start), b=timeToMinutes(end);
+  if(a == null || b == null) return "";
+  let diff = b - a;
+  if(diff < 0) diff += 1440;
+  const h = Math.floor(diff/60);
+  const m = diff%60;
+  if(h === 0) return `${m} min`;
+  return `${h}h ${pad(m)}min`;
+}
+function showStatus(id, msg, type="ok"){
+  const el = document.getElementById(id);
+  el.className = `status show ${type}`;
+  el.textContent = msg;
+  setTimeout(()=>{ el.className = "status"; }, 6500);
+}
+function getSettings(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_SETTINGS) || "{}"); }
+  catch(e){ return {}; }
+}
+function setSettings(s){
+  localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(s));
+}
+function getRecords(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_RECORDS) || "[]"); }
+  catch(e){ return []; }
+}
+function setRecords(records){
+  localStorage.setItem(STORAGE_RECORDS, JSON.stringify(records));
+}
+function saveSettings(){
+  const s = {
+    scriptUrl: document.getElementById("scriptUrl").value.trim(),
+    csvUrl: document.getElementById("csvUrl").value.trim(),
+    startDate: document.getElementById("startDate").value,
+    childInitial: document.getElementById("childInitial").value.trim() || "Maya",
+    routineTarget: document.getElementById("routineTarget").value
+  };
+  setSettings(s);
+  updateComputedFields();
+  showStatus("configStatus","Configuração salva neste navegador.","ok");
+}
+function setTodayAsStart(){
+  document.getElementById("startDate").value = todayISO();
+  saveSettings();
+}
+function loadSettings(){
+  const s = getSettings();
+  document.getElementById("scriptUrl").value = s.scriptUrl || "https://script.google.com/macros/s/AKfycbyKHVUSLoofnQWgKCiTL4iKctDLf6z11Sf8wptVBO5mz4Icbe_-246hGfpERjhcHNS2/exec";
+  document.getElementById("csvUrl").value = s.csvUrl || "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWnpuJrUrL4ijLBYJ7DiurlxINsrSBNYHfcz3RfDjZg6nJ0UtQM8HhBFDlwWGx9Udl5Dc6NfzHgux0/pub?gid=0&single=true&output=csv";
+  document.getElementById("startDate").value = s.startDate || todayISO();
+  document.getElementById("childInitial").value = s.childInitial || "Maya";
+  document.getElementById("routineTarget").value = s.routineTarget || "20:30";
+}
+function updateComputedFields(){
+  const data = document.getElementById("data_registro").value || todayISO();
+  const start = document.getElementById("startDate").value || data;
+  const diff = dateDiffDays(start, data);
+  const dia = (diff >= 0 && diff <= 13) ? `Dia ${diff+1} de 14` : `Fora do ciclo de 14 dias`;
+  document.getElementById("dia_acompanhamento").value = dia;
+  document.getElementById("badgeDia").textContent = dia;
+  document.getElementById("dia_semana").value = weekdayBR(data);
+
+  const tela = diffTime(document.getElementById("tela_inicio").value, document.getElementById("tela_fim").value);
+  document.getElementById("tempo_tela_auto").value = tela;
+
+  const totalSono = diffTime(document.getElementById("dormiu_hora").value, document.getElementById("acordou_hora").value);
+  document.getElementById("total_sono_auto").value = totalSono;
+
+  const dormiu = timeToMinutes(document.getElementById("dormiu_hora").value);
+  if(dormiu != null){
+    document.getElementById("despertarSugerido").textContent = minutesToTime(dormiu + 95);
+    document.getElementById("janelaCritica").textContent = minutesToTime(dormiu + 120);
+  } else {
+    document.getElementById("despertarSugerido").textContent = "--:--";
+    document.getElementById("janelaCritica").textContent = "--:--";
+  }
+}
+function getCheckboxValues(name){
+  return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(x=>x.value);
+}
+function setCheckboxValues(name, values){
+  const set = new Set(Array.isArray(values) ? values : String(values||"").split(";").map(x=>x.trim()).filter(Boolean));
+  document.querySelectorAll(`input[name="${name}"]`).forEach(cb => cb.checked = set.has(cb.value));
+}
+function collectForm(){
+  updateComputedFields();
+  const s = getSettings();
+  const data = {};
+  data.data_envio = new Date().toISOString();
+  data.crianca = document.getElementById("childInitial").value.trim() || "Maya";
+  FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    data[id] = el ? el.value : "";
+  });
+  data.sinais_episodio = getCheckboxValues("sinais_episodio").join("; ");
+  data.despertar_sugerido = document.getElementById("despertarSugerido").textContent;
+  data.janela_critica = document.getElementById("janelaCritica").textContent;
+  data.origem = "HTML Diario Sono Maya";
+  return data;
+}
+function fillForm(record){
+  FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(el && record[id] !== undefined) el.value = record[id];
+  });
+  setCheckboxValues("sinais_episodio", record.sinais_episodio || "");
+  updateComputedFields();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function saveLocalOnly(){
+  const data = collectForm();
+  const records = getRecords();
+  const key = `${data.data_registro}_${data.dia_acompanhamento}_${Date.now()}`;
+  data.local_id = key;
+  records.push(data);
+  setRecords(records);
+  renderLocalRecords();
+  showStatus("formStatus","Registro salvo neste navegador. Ainda não foi enviado para a planilha.","warn");
+}
+function saveAndSend(){
+  const s = getSettings();
+  const data = collectForm();
+  const records = getRecords();
+  data.local_id = `${data.data_registro}_${Date.now()}`;
+  data.enviado_planilha = false;
+  records.push(data);
+  setRecords(records);
+  renderLocalRecords();
+
+  if(!s.scriptUrl || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(s.scriptUrl)){
+    showStatus("formStatus","Salvei localmente, mas falta configurar a URL do Google Apps Script para enviar à planilha.","warn");
+    return;
+  }
+
+  try{
+    postToAppsScript(s.scriptUrl, data);
+    const updated = getRecords();
+    const idx = updated.findIndex(r => r.local_id === data.local_id);
+    if(idx >= 0){
+      updated[idx].enviado_planilha = true;
+      updated[idx].status_envio = "Enviado via formulário HTML";
+      setRecords(updated);
+    }
+    renderLocalRecords();
+    document.getElementById("statusRegistro").textContent = "Enviado";
+    showStatus("formStatus","Registro enviado para a planilha e salvo como backup local.","ok");
+  }catch(err){
+    showStatus("formStatus","Salvei localmente, mas houve falha ao tentar enviar. Verifique a URL do Apps Script.", "err");
+  }
+}
+function postToAppsScript(url, data){
+  const iframe = document.getElementById("hiddenSubmitFrame");
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = url;
+  form.target = "hiddenSubmitFrame";
+  form.style.display = "none";
+
+  const input = document.createElement("input");
+  input.type = "hidden";
+  input.name = "payload";
+  input.value = JSON.stringify(data);
+  form.appendChild(input);
+
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(()=> form.remove(), 1200);
+}
+function clearFormKeepConfig(){
+  if(!confirm("Limpar todos os campos do formulário atual?")) return;
+  document.getElementById("sleepForm").reset();
+  document.getElementById("data_registro").value = todayISO();
+  document.getElementById("teve_episodio").value = "";
+  updateComputedFields();
+}
+function clearLocalRecords(){
+  if(!confirm("Apagar todos os registros salvos localmente neste navegador? A planilha não será alterada.")) return;
+  setRecords([]);
+  renderLocalRecords();
+  showStatus("formStatus","Registros locais apagados.","warn");
+}
+function escapeHtml(v){
+  return String(v ?? "").replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+function renderLocalRecords(){
+  const records = getRecords();
+  const el = document.getElementById("localRecords");
+  if(!records.length){
+    el.innerHTML = `<p class="small">Nenhum registro local ainda.</p>`;
+    return;
+  }
+  const last = records.slice(-14).reverse();
+  el.innerHTML = `
+    <table>
+      <thead><tr><th>Data</th><th>Dia</th><th>Episódio</th><th>Hora</th><th>Sinais</th><th>Status</th><th>Ação</th></tr></thead>
+      <tbody>
+        ${last.map((r,i)=>`
+          <tr>
+            <td>${escapeHtml(r.data_registro)}</td>
+            <td>${escapeHtml(r.dia_acompanhamento)}</td>
+            <td>${escapeHtml(r.teve_episodio)}</td>
+            <td>${escapeHtml(r.episodio_hora)}</td>
+            <td>${escapeHtml(r.sinais_episodio)}</td>
+            <td>${r.enviado_planilha ? '<span class="pill">planilha</span>' : '<span class="pill">local</span>'}</td>
+            <td><button type="button" class="ghost" onclick="loadLocalRecord(${records.length-1-i})">Abrir</button></td>
+          </tr>`).join("")}
+      </tbody>
+    </table>
+  `;
+}
+function loadLocalRecord(index){
+  const records = getRecords();
+  const r = records[index];
+  if(r) fillForm(r);
+}
+function csvEscape(v){
+  const s = String(v ?? "");
+  return /[",\n;]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+}
+function exportLocalCsv(){
+  const records = getRecords();
+  if(!records.length){
+    showStatus("formStatus","Não há registros locais para exportar.","warn");
+    return;
+  }
+  const headers = Array.from(new Set(records.flatMap(r => Object.keys(r))));
+  const csv = [headers.join(",")]
+    .concat(records.map(r => headers.map(h => csvEscape(r[h])).join(",")))
+    .join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `diario_sono_maya_${todayISO()}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function parseCsv(text){
+  const rows=[]; let row=[], cur="", quote=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i], n=text[i+1];
+    if(c === '"' && quote && n === '"'){ cur += '"'; i++; continue; }
+    if(c === '"'){ quote = !quote; continue; }
+    if(c === "," && !quote){ row.push(cur); cur=""; continue; }
+    if((c === "\n" || c === "\r") && !quote){
+      if(cur || row.length){ row.push(cur); rows.push(row); row=[]; cur=""; }
+      if(c === "\r" && n === "\n") i++;
+      continue;
+    }
+    cur += c;
+  }
+  if(cur || row.length){ row.push(cur); rows.push(row); }
+  return rows;
+}
+async function loadCsvPreview(){
+  const url = document.getElementById("csvUrl").value.trim();
+  if(!url){
+    showStatus("configStatus","Informe o link CSV publicado da planilha.","warn");
+    return;
+  }
+  try{
+    const resp = await fetch(url);
+    const text = await resp.text();
+    const rows = parseCsv(text);
+    const el = document.getElementById("csvPreview");
+    if(rows.length < 2){
+      el.innerHTML = `<p class="small">A planilha publicada ainda não retornou registros preenchidos.</p>`;
+      showStatus("configStatus","CSV carregado, mas sem linhas de dados.","warn");
+      return;
+    }
+    const headers = rows[0];
+    const last = rows.slice(-8).reverse();
+    el.innerHTML = `
+      <h3>Últimos registros lidos do CSV publicado</h3>
+      <table>
+        <thead><tr>${headers.slice(0,8).map(h=>`<th>${escapeHtml(h)}</th>`).join("")}</tr></thead>
+        <tbody>${last.map(r=>`<tr>${r.slice(0,8).map(c=>`<td>${escapeHtml(c)}</td>`).join("")}</tr>`).join("")}</tbody>
+      </table>
+    `;
+    showStatus("configStatus",`CSV carregado: ${Math.max(rows.length-1,0)} registros encontrados.`, "ok");
+  }catch(err){
+    showStatus("configStatus","Não consegui carregar o CSV. Verifique se o link publicado está ativo.", "err");
+  }
+}
+function addListeners(){
+  ["data_registro","startDate","tela_inicio","tela_fim","dormiu_hora","acordou_hora"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener("input", updateComputedFields);
+  });
+  document.getElementById("teve_episodio").addEventListener("change", () => {
+    document.getElementById("statusRegistro").textContent =
+      document.getElementById("teve_episodio").value.includes("Não") ? "Noite sem episódio" : "Com episódio";
+  });
+}
+document.addEventListener("DOMContentLoaded", () => {
+  loadSettings();
+  document.getElementById("data_registro").value = todayISO();
+  addListeners();
+  updateComputedFields();
+  renderLocalRecords();
+});
+</script>
+</body>
+</html>
