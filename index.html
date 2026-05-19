@@ -681,9 +681,12 @@
           </div>
         </div>
 
+        <div id="editModeBanner" class="status"></div>
+
         <div class="actions">
-          <button type="button" class="ok" onclick="saveAndSend()">✅ Salvar e enviar para planilha</button>
-          <button type="button" class="secondary" onclick="saveLocalOnly()">💾 Salvar somente neste navegador</button>
+          <button id="saveSendBtn" type="button" class="ok" onclick="saveAndSend()">✅ Salvar e enviar para planilha</button>
+          <button id="saveLocalBtn" type="button" class="secondary" onclick="saveLocalOnly()">💾 Salvar somente neste navegador</button>
+          <button id="newRecordBtn" type="button" class="ghost" onclick="startNewRecord()" style="display:none">🆕 Iniciar novo registro</button>
           <button type="button" class="ghost" onclick="exportLocalCsv()">⬇️ Exportar registros locais em CSV</button>
           <button type="button" class="ghost" onclick="clearFormKeepConfig()">🧹 Limpar formulário</button>
           <button type="button" class="danger" onclick="clearLocalRecords()">🗑️ Apagar registros locais</button>
@@ -703,6 +706,7 @@
 <script>
 const STORAGE_SETTINGS = "mayaSonoSettings_v1";
 const STORAGE_RECORDS = "mayaSonoRecords_v1";
+let editingLocalId = null;
 
 const FIELD_IDS = [
   "data_registro","dia_acompanhamento","dia_semana","responsavel",
@@ -857,22 +861,55 @@ function fillForm(record){
 function saveLocalOnly(){
   const data = collectForm();
   const records = getRecords();
+  const idx = editingLocalId ? records.findIndex(r => r.local_id === editingLocalId) : -1;
+
+  if(idx >= 0){
+    const previous = records[idx];
+    data.local_id = previous.local_id;
+    data.data_envio = previous.data_envio || data.data_envio;
+    data.enviado_planilha = previous.enviado_planilha || false;
+    data.status_envio = previous.status_envio || "Editado localmente";
+    data.data_ultima_edicao = new Date().toISOString();
+    records[idx] = {...previous, ...data};
+    setRecords(records);
+    renderLocalRecords();
+    setEditMode(records[idx]);
+    showStatus("formStatus","Registro atualizado no mesmo formulário. Não foi criada uma nova cópia local.","ok");
+    return;
+  }
+
   const key = `${data.data_registro}_${data.dia_acompanhamento}_${Date.now()}`;
   data.local_id = key;
+  data.enviado_planilha = false;
   records.push(data);
   setRecords(records);
   renderLocalRecords();
-  showStatus("formStatus","Registro salvo neste navegador. Ainda não foi enviado para a planilha.","warn");
+  setEditMode(data);
+  showStatus("formStatus","Registro salvo neste navegador. Você pode continuar editando este mesmo formulário.","warn");
 }
 function saveAndSend(){
   const s = getSettings();
   const data = collectForm();
   const records = getRecords();
-  data.local_id = `${data.data_registro}_${Date.now()}`;
-  data.enviado_planilha = false;
-  records.push(data);
+  const idx = editingLocalId ? records.findIndex(r => r.local_id === editingLocalId) : -1;
+
+  if(idx >= 0){
+    const previous = records[idx];
+    data.local_id = previous.local_id;
+    data.data_envio = previous.data_envio || data.data_envio;
+    data.enviado_planilha = previous.enviado_planilha || false;
+    data.status_envio = previous.status_envio || "Editado e preparado para reenvio";
+    data.data_ultima_edicao = new Date().toISOString();
+    records[idx] = {...previous, ...data};
+  } else {
+    data.local_id = `${data.data_registro}_${Date.now()}`;
+    data.enviado_planilha = false;
+    records.push(data);
+  }
+
   setRecords(records);
   renderLocalRecords();
+  setEditMode(data);
 
   if(!s.scriptUrl || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(s.scriptUrl)){
     showStatus("formStatus","Salvei localmente, mas falta configurar a URL do Google Apps Script para enviar à planilha.","warn");
@@ -882,15 +919,17 @@ function saveAndSend(){
   try{
     postToAppsScript(s.scriptUrl, data);
     const updated = getRecords();
-    const idx = updated.findIndex(r => r.local_id === data.local_id);
-    if(idx >= 0){
-      updated[idx].enviado_planilha = true;
-      updated[idx].status_envio = "Enviado via formulário HTML";
+    const savedIdx = updated.findIndex(r => r.local_id === data.local_id);
+    if(savedIdx >= 0){
+      updated[savedIdx].enviado_planilha = true;
+      updated[savedIdx].status_envio = idx >= 0 ? "Registro editado e reenviado via formulário HTML" : "Enviado via formulário HTML";
+      updated[savedIdx].data_ultima_edicao = data.data_ultima_edicao || updated[savedIdx].data_ultima_edicao || "";
       setRecords(updated);
+      setEditMode(updated[savedIdx]);
     }
     renderLocalRecords();
-    document.getElementById("statusRegistro").textContent = "Enviado";
-    showStatus("formStatus","Registro enviado para a planilha e salvo como backup local.","ok");
+    document.getElementById("statusRegistro").textContent = idx >= 0 ? "Editado" : "Enviado";
+    showStatus("formStatus", idx >= 0 ? "Registro atualizado no mesmo formulário e reenviado para a planilha." : "Registro enviado para a planilha e salvo como backup local.","ok");
   }catch(err){
     showStatus("formStatus","Salvei localmente, mas houve falha ao tentar enviar. Verifique a URL do Apps Script.", "err");
   }
@@ -918,7 +957,16 @@ function clearFormKeepConfig(){
   document.getElementById("sleepForm").reset();
   document.getElementById("data_registro").value = todayISO();
   document.getElementById("teve_episodio").value = "";
+  setEditMode(null);
   updateComputedFields();
+}
+function startNewRecord(){
+  document.getElementById("sleepForm").reset();
+  document.getElementById("data_registro").value = todayISO();
+  document.getElementById("teve_episodio").value = "";
+  setEditMode(null);
+  updateComputedFields();
+  showStatus("formStatus","Novo registro iniciado. Ao salvar, será criada uma nova entrada local.","ok");
 }
 function clearLocalRecords(){
   if(!confirm("Apagar todos os registros salvos localmente neste navegador? A planilha não será alterada.")) return;
@@ -949,16 +997,51 @@ function renderLocalRecords(){
             <td>${escapeHtml(r.episodio_hora)}</td>
             <td>${escapeHtml(r.sinais_episodio)}</td>
             <td>${r.enviado_planilha ? '<span class="pill">planilha</span>' : '<span class="pill">local</span>'}</td>
-            <td><button type="button" class="ghost" onclick="loadLocalRecord(${records.length-1-i})">Abrir</button></td>
+            <td><button type="button" class="ghost" onclick="loadLocalRecord(${records.length-1-i})">Editar</button></td>
           </tr>`).join("")}
       </tbody>
     </table>
   `;
 }
+function setEditMode(record){
+  const banner = document.getElementById("editModeBanner");
+  const saveSendBtn = document.getElementById("saveSendBtn");
+  const saveLocalBtn = document.getElementById("saveLocalBtn");
+  const newRecordBtn = document.getElementById("newRecordBtn");
+
+  if(record && record.local_id){
+    editingLocalId = record.local_id;
+    if(banner){
+      banner.className = "status show warn";
+      banner.textContent = `Modo edição ativo: este formulário está vinculado ao registro de ${record.data_registro || "data não informada"}. Ao salvar, a cópia local será atualizada sem duplicar.`;
+    }
+    if(saveSendBtn) saveSendBtn.textContent = "✅ Atualizar e enviar para planilha";
+    if(saveLocalBtn) saveLocalBtn.textContent = "💾 Atualizar somente neste navegador";
+    if(newRecordBtn) newRecordBtn.style.display = "inline-flex";
+    document.getElementById("statusRegistro").textContent = "Editando";
+  } else {
+    editingLocalId = null;
+    if(banner) banner.className = "status";
+    if(saveSendBtn) saveSendBtn.textContent = "✅ Salvar e enviar para planilha";
+    if(saveLocalBtn) saveLocalBtn.textContent = "💾 Salvar somente neste navegador";
+    if(newRecordBtn) newRecordBtn.style.display = "none";
+    document.getElementById("statusRegistro").textContent = "Aberto";
+  }
+}
 function loadLocalRecord(index){
   const records = getRecords();
   const r = records[index];
-  if(r) fillForm(r);
+  if(!r) return;
+
+  if(!r.local_id){
+    r.local_id = `${r.data_registro || todayISO()}_${index}_${Date.now()}`;
+    records[index] = r;
+    setRecords(records);
+  }
+
+  fillForm(r);
+  setEditMode(r);
+  showStatus("formStatus","Registro aberto em modo edição. Ao salvar, a cópia local será atualizada no mesmo registro.","ok");
 }
 function csvEscape(v){
   const s = String(v ?? "");
@@ -1043,6 +1126,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("data_registro").value = todayISO();
   addListeners();
   updateComputedFields();
+  setEditMode(null);
   renderLocalRecords();
 });
 </script>
