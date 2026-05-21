@@ -1,637 +1,1012 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Diário de Sono e Rotina da Maya</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌙 Diário de Sono da Maya</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    :root{
-      --bg:#f5f7fb;
-      --card:#ffffff;
-      --ink:#1f2937;
-      --muted:#6b7280;
-      --line:#d9e1ec;
-      --brand:#2563eb;
-      --brand2:#0f766e;
-      --danger:#b91c1c;
-      --warn:#92400e;
-      --ok:#166534;
-      --soft:#eef4ff;
-      --shadow:0 12px 30px rgba(15,23,42,.08);
-      --radius:18px;
+    /* ─── CSS VARIABLES ─── */
+    :root {
+      --primary:       #6366f1;
+      --primary-dark:  #4f46e5;
+      --primary-light: #a5b4fc;
+      --secondary:     #8b5cf6;
+      --success:       #10b981;
+      --warning:       #f59e0b;
+      --danger:        #ef4444;
+      --bg:            #eef0fb;
+      --surface:       #ffffff;
+      --surface2:      #f8fafc;
+      --border:        #e2e8f0;
+      --text:          #1e293b;
+      --muted:         #64748b;
+      --shadow-sm:     0 1px 3px rgba(0,0,0,.07);
+      --shadow:        0 4px 16px rgba(99,102,241,.1);
+      --shadow-lg:     0 12px 40px rgba(99,102,241,.18);
+      --radius:        18px;
+      --radius-sm:     11px;
+      --header-h:      108px;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: Arial, Helvetica, sans-serif;
-      color:var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(37,99,235,.10), transparent 32rem),
-        radial-gradient(circle at top right, rgba(15,118,110,.10), transparent 28rem),
-        var(--bg);
-      line-height:1.45;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.5;
     }
-    header{
-      padding:28px 18px 16px;
-      max-width:1180px;
-      margin:0 auto;
+
+    /* ─── HEADER ─── */
+    .app-header {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #9333ea 100%);
+      padding: 16px 24px 0;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 4px 28px rgba(79,70,229,.35);
     }
-    .topbar{
-      display:flex;
-      gap:16px;
-      align-items:flex-start;
-      justify-content:space-between;
-      flex-wrap:wrap;
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 12px;
     }
-    h1{
-      margin:0;
-      font-size:clamp(1.45rem, 2.4vw, 2.35rem);
-      letter-spacing:-.03em;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
     }
-    .subtitle{
-      margin:8px 0 0;
-      color:var(--muted);
-      max-width:850px;
+    .brand-logo {
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,.18);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      backdrop-filter: blur(6px);
+      flex-shrink: 0;
     }
-    .badge{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:999px;
-      padding:10px 14px;
-      box-shadow:var(--shadow);
-      font-weight:700;
-      color:var(--brand);
-      white-space:nowrap;
+    .brand h1 {
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      line-height: 1.2;
     }
-    main{
-      max-width:1180px;
-      margin:0 auto;
-      padding:0 18px 42px;
+    .brand p {
+      color: rgba(255,255,255,.7);
+      font-size: .76rem;
+      margin-top: 1px;
     }
-    .grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:18px;
+    .header-pills {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
     }
-    @media(min-width:920px){
-      .grid.two{grid-template-columns:1fr 1fr}
-      .grid.three{grid-template-columns:repeat(3, 1fr)}
+    .hpill {
+      background: rgba(255,255,255,.15);
+      color: #fff;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: .76rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(6px);
     }
-    .card{
-      background:rgba(255,255,255,.92);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:18px;
-      backdrop-filter: blur(10px);
+    .hpill .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--success);
     }
-    .card h2{
-      margin:0 0 12px;
-      font-size:1.14rem;
-      letter-spacing:-.01em;
-      display:flex;
-      align-items:center;
-      gap:8px;
+    .hpill .dot.off { background: #f87171; animation: none !important; }
+    .hpill .dot.pulse { animation: blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ─── TABS ─── */
+    .tabs {
+      display: flex;
+      gap: 2px;
     }
-    .card h3{
-      margin:14px 0 8px;
-      font-size:1rem;
+    .tab-btn {
+      padding: 9px 18px 9px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,.6);
+      font-family: inherit;
+      font-size: .84rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 11px 11px 0 0;
+      transition: all .18s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
     }
-    label{
-      display:block;
-      font-size:.9rem;
-      font-weight:700;
-      margin:10px 0 5px;
+    .tab-btn:hover { color: #fff; background: rgba(255,255,255,.1); }
+    .tab-btn.active {
+      color: var(--primary);
+      background: var(--bg);
+      font-weight: 700;
     }
-    .hint{
-      color:var(--muted);
-      font-size:.83rem;
-      margin-top:4px;
+    .tab-btn .tab-count {
+      background: rgba(255,255,255,.25);
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-size: .7rem;
+      font-weight: 700;
     }
-    input, select, textarea{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:#fff;
-      padding:10px 12px;
-      font-size:1rem;
-      color:var(--ink);
-      outline:none;
+    .tab-btn.active .tab-count {
+      background: #e0e7ff;
+      color: var(--primary);
     }
-    input:focus, select:focus, textarea:focus{
-      border-color:var(--brand);
-      box-shadow:0 0 0 3px rgba(37,99,235,.12);
+
+    /* ─── CONTAINER ─── */
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 24px 16px 100px;
     }
-    textarea{min-height:92px; resize:vertical}
-    .row{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:12px;
+
+    /* ─── PANELS ─── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ─── SETUP BOX ─── */
+    .setup-box {
+      background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+      border: 2px dashed #818cf8;
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin-bottom: 20px;
     }
-    @media(min-width:680px){
-      .row.cols-2{grid-template-columns:1fr 1fr}
-      .row.cols-3{grid-template-columns:repeat(3, 1fr)}
-      .row.cols-4{grid-template-columns:repeat(4, 1fr)}
+    .setup-box h3 { color: var(--primary-dark); font-size: .98rem; margin-bottom: 6px; }
+    .setup-box p { font-size: .82rem; color: #4338ca; margin-bottom: 10px; }
+    .setup-box pre {
+      background: #0f172a;
+      color: #7dd3fc;
+      border-radius: 10px;
+      padding: 16px;
+      font-size: .75rem;
+      overflow-x: auto;
+      line-height: 1.65;
+      margin-bottom: 14px;
+      white-space: pre;
     }
-    .checkgrid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:8px;
-      margin-top:8px;
+
+    /* ─── EDIT BANNER ─── */
+    .edit-banner {
+      display: none;
+      background: #fffbeb;
+      border: 1.5px solid #fcd34d;
+      border-radius: var(--radius-sm);
+      padding: 11px 16px;
+      margin-bottom: 18px;
+      font-size: .84rem;
+      color: #78350f;
+      font-weight: 500;
+      align-items: center;
+      gap: 10px;
     }
-    @media(min-width:680px){ .checkgrid{grid-template-columns:repeat(2,1fr)} }
-    @media(min-width:1020px){ .checkgrid{grid-template-columns:repeat(3,1fr)} }
-    .check{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:9px 10px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:#fff;
-      min-height:42px;
+    .edit-banner.show { display: flex; }
+    .edit-banner strong { font-weight: 700; }
+
+    /* ─── SECTION CARDS ─── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 22px 24px;
+      margin-bottom: 14px;
+      transition: box-shadow .2s;
     }
-    .check input{width:auto; margin:0}
-    .check label{margin:0; font-weight:600; font-size:.9rem}
-    .actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:14px;
+    .section:focus-within { box-shadow: var(--shadow); }
+
+    .section-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
     }
-    button, .button{
-      border:0;
-      border-radius:12px;
-      padding:11px 15px;
-      font-weight:800;
-      font-size:.95rem;
-      cursor:pointer;
-      background:var(--brand);
-      color:#fff;
-      box-shadow:0 8px 18px rgba(37,99,235,.18);
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
+    .section-icon {
+      width: 38px; height: 38px;
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px;
+      flex-shrink: 0;
+      margin-top: 1px;
     }
-    button.secondary{background:#334155; box-shadow:none}
-    button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:none}
-    button.danger{background:var(--danger);box-shadow:none}
-    button.ok{background:var(--ok);box-shadow:none}
-    .summary{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-      margin-top:10px;
+    .ico-indigo  { background: #eef2ff; }
+    .ico-yellow  { background: #fefce8; }
+    .ico-green   { background: #ecfdf5; }
+    .ico-blue    { background: #eff6ff; }
+    .ico-orange  { background: #fff7ed; }
+    .ico-purple  { background: #faf5ff; }
+    .ico-red     { background: #fef2f2; }
+    .ico-teal    { background: #f0fdfa; }
+
+    .section-header .sec-title { font-size: .97rem; font-weight: 700; line-height: 1.2; }
+    .section-header .sec-sub   { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+
+    /* ─── FIELD GROUPS ─── */
+    .fg { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 14px; }
+    .fg:last-child { margin-bottom: 0; }
+    @media(min-width:560px) {
+      .fg.c2 { grid-template-columns: 1fr 1fr; }
+      .fg.c3 { grid-template-columns: 1fr 1fr 1fr; }
+      .fg.c4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
     }
-    @media(min-width:760px){ .summary{grid-template-columns:repeat(4,1fr)} }
-    .metric{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      background:var(--soft);
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: .79rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: .005em;
     }
-    .metric span{
-      display:block;
-      color:var(--muted);
-      font-size:.78rem;
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:.04em;
+    .field .hint { font-size: .73rem; color: var(--muted); }
+
+    /* ─── INPUTS ─── */
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: .88rem;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color .18s, box-shadow .18s;
+      appearance: auto;
     }
-    .metric strong{
-      display:block;
-      font-size:1.35rem;
-      margin-top:4px;
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99,102,241,.12);
     }
-    .status{
-      margin-top:12px;
-      border-radius:12px;
-      padding:11px 12px;
-      font-weight:700;
-      display:none;
+    input[readonly] {
+      background: var(--surface2);
+      color: var(--muted);
+      cursor: default;
     }
-    .status.show{display:block}
-    .status.ok{background:#dcfce7;color:#14532d;border:1px solid #bbf7d0}
-    .status.warn{background:#fef3c7;color:#78350f;border:1px solid #fde68a}
-    .status.err{background:#fee2e2;color:#7f1d1d;border:1px solid #fecaca}
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:.9rem;
-      margin-top:10px;
-      overflow:hidden;
-      border-radius:12px;
+    textarea { min-height: 76px; resize: vertical; }
+    select { cursor: pointer; }
+
+    /* ─── CHECKBOX GRID ─── */
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px,1fr));
+      gap: 8px;
+      margin-top: 8px;
     }
-    th,td{
-      border-bottom:1px solid var(--line);
-      padding:9px;
-      text-align:left;
-      vertical-align:top;
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      user-select: none;
     }
-    th{background:#f8fafc;color:#334155;font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
-    .small{font-size:.84rem;color:var(--muted)}
-    .divider{height:1px;background:var(--line);margin:16px 0}
-    .pill{
-      display:inline-block;
-      padding:4px 8px;
-      border-radius:999px;
-      background:#e0f2fe;
-      color:#075985;
-      font-size:.78rem;
-      font-weight:800;
-      margin:2px 4px 2px 0;
+    .check-item:hover { border-color: var(--primary); background: #f5f3ff; }
+    .check-item input[type="checkbox"] { width: auto; accent-color: var(--primary); flex-shrink: 0; }
+    .check-item span { font-size: .83rem; font-weight: 500; }
+
+    /* ─── METRICS ─── */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap: 10px;
+      margin-top: 18px;
     }
-    .print-note{display:none}
-    iframe[name="hiddenSubmitFrame"]{display:none}
-    @media print{
-      body{background:#fff}
-      header, main{max-width:none}
-      .actions,.no-print,.status{display:none!important}
-      .card{box-shadow:none;break-inside:avoid}
-      .print-note{display:block}
-      input,select,textarea{border:1px solid #999}
+    .metric {
+      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+      border: 1px solid #ddd6fe;
+      border-radius: 13px;
+      padding: 14px 16px;
     }
+    .metric-label {
+      font-size: .68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #7c3aed;
+      margin-bottom: 5px;
+    }
+    .metric-value {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #3b0764;
+      line-height: 1;
+    }
+    .metric-hint { font-size: .7rem; color: #8b5cf6; margin-top: 4px; }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 11px;
+      font-family: inherit;
+      font-size: .86rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .btn-primary  { background: var(--primary);  color: #fff; box-shadow: 0 4px 14px rgba(99,102,241,.3); }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(99,102,241,.4); }
+    .btn-success  { background: var(--success);  color: #fff; box-shadow: 0 4px 14px rgba(16,185,129,.25); }
+    .btn-success:hover { background: #059669; transform: translateY(-1px); }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-danger { background: #fef2f2; color: var(--danger); border: 1.5px solid #fecaca; }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid transparent; }
+    .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+    .btn-sm { padding: 6px 12px; font-size: .79rem; border-radius: 8px; gap: 5px; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+
+    /* ─── FORM ACTIONS (sticky) ─── */
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 14px 24px;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      border-radius: 0 0 var(--radius) var(--radius);
+      position: sticky;
+      bottom: 0;
+      z-index: 50;
+      margin-top: -1px;
+    }
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    /* ─── HISTORY ─── */
+    .hist-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      align-items: flex-end;
+    }
+    .hist-controls .field { flex: 1; min-width: 120px; max-width: 200px; }
+
+    .records-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .rec-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 15px;
+      overflow: hidden;
+      transition: box-shadow .2s, border-color .2s;
+    }
+    .rec-card:hover { box-shadow: var(--shadow); border-color: #c7d2fe; }
+
+    .rec-header {
+      display: flex;
+      align-items: center;
+      padding: 14px 18px;
+      gap: 14px;
+      cursor: pointer;
+    }
+    .rec-datebadge {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      border-radius: 11px;
+      padding: 9px 12px;
+      text-align: center;
+      min-width: 52px;
+      flex-shrink: 0;
+    }
+    .rec-datebadge .rdb-day   { font-size: 1.25rem; font-weight: 800; line-height: 1; }
+    .rec-datebadge .rdb-month { font-size: .65rem; text-transform: uppercase; opacity: .85; margin-top: 2px; }
+
+    .rec-info { flex: 1; min-width: 0; }
+    .rec-info h3 {
+      font-size: .9rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .rec-info .rec-meta { font-size: .76rem; color: var(--muted); margin-top: 2px; }
+    .rec-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: .71rem;
+      font-weight: 700;
+    }
+    .c-green   { background: #d1fae5; color: #065f46; }
+    .c-red     { background: #fee2e2; color: #991b1b; }
+    .c-orange  { background: #ffedd5; color: #9a3412; }
+    .c-purple  { background: #ede9fe; color: #5b21b6; }
+    .c-blue    { background: #dbeafe; color: #1e40af; }
+    .c-gray    { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+    .rec-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .rec-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .32s ease, padding .32s;
+      padding: 0 18px;
+    }
+    .rec-detail.open { max-height: 700px; padding: 0 18px 16px; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(195px,1fr));
+      gap: 10px;
+      background: var(--surface2);
+      border-radius: 11px;
+      padding: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .di-label { font-size: .68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .di-value { font-size: .83rem; color: var(--text); font-weight: 500; margin-top: 2px; }
+
+    /* ─── ANALYTICS ─── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(165px,1fr));
+      gap: 13px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 16px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-card .sv {
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .stat-card .sl {
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .stat-card .sd { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+
+    /* ─── MODAL ─── */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,.55);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-bg.show { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 22px;
+      padding: 30px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 32px 80px rgba(0,0,0,.22);
+      animation: popIn .22s ease;
+    }
+    @keyframes popIn { from{transform:scale(.92);opacity:0} to{transform:scale(1);opacity:1} }
+    .modal h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .modal p  { font-size: .86rem; color: var(--muted); margin-bottom: 22px; line-height: 1.55; }
+    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ─── TOAST ─── */
+    #toasts {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: #fff;
+      border-radius: 12px;
+      padding: 11px 16px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.14);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: .86rem;
+      font-weight: 600;
+      min-width: 240px;
+      max-width: 340px;
+      border-left: 4px solid;
+      animation: slideIn .28s ease;
+      pointer-events: auto;
+    }
+    @keyframes slideIn { from{transform:translateX(60px);opacity:0} to{transform:translateX(0);opacity:1} }
+    .toast.ok   { border-color: var(--success); }
+    .toast.err  { border-color: var(--danger);  }
+    .toast.warn { border-color: var(--warning); }
+
+    /* ─── LOADERS / EMPTY ─── */
+    .loader {
+      display: flex; align-items: center; justify-content: center;
+      padding: 44px; gap: 12px; color: var(--muted); font-size: .88rem;
+    }
+    .spin {
+      width: 20px; height: 20px;
+      border: 2.5px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: rot .65s linear infinite;
+    }
+    @keyframes rot { to { transform: rotate(360deg); } }
+    .empty {
+      text-align: center; padding: 52px 24px;
+      color: var(--muted);
+    }
+    .empty .ei { font-size: 3.2rem; margin-bottom: 12px; }
+    .empty h3  { font-size: .98rem; color: var(--text); margin-bottom: 4px; }
+    .empty p   { font-size: .83rem; }
+
+    /* ─── RESPONSIVE ─── */
+    @media(max-width:600px) {
+      .header-pills { display: none; }
+      .brand h1 { font-size: 1.05rem; }
+      .form-actions { position: fixed; left:0; right:0; bottom:0; border-radius:0; padding:12px 16px; }
+      .container { padding-bottom: 90px; }
+      .rec-actions .btn span { display: none; }
+    }
+
+    /* ─── TABLE ─── */
+    .data-table { width:100%; border-collapse:collapse; font-size:.83rem; }
+    .data-table th, .data-table td { padding:9px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:middle; }
+    .data-table thead th { background:var(--surface2); font-size:.71rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); position:sticky;top:0; }
+    .data-table tbody tr:hover { background:var(--surface2); }
+    .table-wrap { overflow-x:auto; border-radius:11px; border:1px solid var(--border); }
+
+    /* ─── SETUP hidden ─── */
+    #setup-box { display: none; }
+    #setup-box.show { display: block; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="topbar">
+
+<!-- ═══════════════════════ HEADER ═══════════════════════ -->
+<header class="app-header">
+  <div class="header-top">
+    <div class="brand">
+      <div class="brand-logo">🌙</div>
       <div>
-        <h1>Diário de Sono e Rotina da Maya</h1>
-        <p class="subtitle">
-          Registro objetivo de 14 dias para entender gatilhos de sono agitado, ansiedade antecipatória,
-          atividade física, alimentação, telas e episódios noturnos.
-        </p>
+        <h1>Diário de Sono da Maya</h1>
+        <p>Acompanhamento de sono e rotina • 14 dias</p>
       </div>
-      <div class="badge" id="badgeDia">Dia 1 de 14</div>
     </div>
-  </header>
+    <div class="header-pills">
+      <div class="hpill" id="conn-pill">
+        <div class="dot off" id="conn-dot"></div>
+        <span id="conn-label">Conectando…</span>
+      </div>
+      <div class="hpill" id="day-pill">Dia — de 14</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-form"      onclick="goTab('form')">✏️ Formulário</button>
+    <button class="tab-btn"        id="tab-history"   onclick="goTab('history')">📋 Histórico <span class="tab-count" id="tc-hist">0</span></button>
+    <button class="tab-btn"        id="tab-analytics" onclick="goTab('analytics')">📊 Análise</button>
+  </div>
+</header>
 
-  <main>
-    <div class="card no-print">
-      <h2>⚙️ Configuração de envio para Google Sheets</h2>
-      <p class="small">
-        O link CSV da planilha é usado apenas para consulta/leitura. Para gravar dados online, cole abaixo a URL do
-        Web App do Google Apps Script depois de publicar o script entregue junto com este HTML.
-      </p>
-      <div class="row cols-2">
-        <div>
-          <label for="scriptUrl">URL do Google Apps Script Web App</label>
-          <input id="scriptUrl" value="https://script.google.com/macros/s/AKfycbyKHVUSLoofnQWgKCiTL4iKctDLf6z11Sf8wptVBO5mz4Icbe_-246hGfpERjhcHNS2/exec" placeholder="https://script.google.com/macros/s/SEU_ID/exec" />
-        </div>
-        <div>
-          <label for="csvUrl">Link CSV publicado da planilha</label>
-          <input id="csvUrl" value="https://docs.google.com/spreadsheets/d/e/2PACX-1vSWnpuJrUrL4ijLBYJ7DiurlxINsrSBNYHfcz3RfDjZg6nJ0UtQM8HhBFDlwWGx9Udl5Dc6NfzHgux0/pub?gid=0&single=true&output=csv" />
-        </div>
-      </div>
-      <div class="row cols-3">
-        <div>
-          <label for="startDate">Data inicial do acompanhamento</label>
-          <input id="startDate" type="date" />
-          <div class="hint">Usado para calcular automaticamente Dia 1 a Dia 14.</div>
-        </div>
-        <div>
-          <label for="childInitial">Identificação da criança</label>
-          <input id="childInitial" value="Maya" />
-          <div class="hint">Evite dados sensíveis desnecessários.</div>
-        </div>
-        <div>
-          <label for="routineTarget">Meta de horário para dormir</label>
-          <input id="routineTarget" type="time" value="20:30" />
-        </div>
-      </div>
-      <div class="actions">
-        <button type="button" onclick="saveSettings()">💾 Salvar configuração</button>
-        <button type="button" class="ghost" onclick="setTodayAsStart()">📅 Hoje é Dia 1</button>
-        <button type="button" class="ghost" onclick="loadCsvPreview()">📊 Carregar registros da planilha</button>
-        <button type="button" class="ghost" onclick="window.print()">🖨️ Imprimir página atual</button>
-      </div>
-      <div id="configStatus" class="status"></div>
+<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<div class="container">
+
+  <!-- SETUP SQL BOX (shown if table missing) -->
+  <div id="setup-box">
+    <div class="setup-box">
+      <h3>⚙️ Configure o banco de dados Supabase</h3>
+      <p>Execute o SQL abaixo no <strong>SQL Editor</strong> do seu projeto Supabase para criar a tabela:</p>
+      <pre id="setup-sql"></pre>
+      <button class="btn btn-primary btn-sm" onclick="document.getElementById('setup-box').classList.remove('show')">✓ Já configurei — recarregar</button>
+    </div>
+  </div>
+
+  <!-- ───── PAINEL: FORMULÁRIO ───── -->
+  <div class="tab-panel active" id="panel-form">
+
+    <!-- Banner de edição -->
+    <div class="edit-banner" id="edit-banner">
+      ✏️ <div><strong>Modo edição ativo</strong> — <span id="banner-detail">este registro será atualizado ao salvar</span></div>
     </div>
 
-    <form id="sleepForm" autocomplete="on">
-      <input type="hidden" name="payload" id="payload" />
-      <iframe name="hiddenSubmitFrame" id="hiddenSubmitFrame"></iframe>
+    <form id="sleep-form" novalidate>
 
-      <section class="card">
-        <h2>📅 Identificação do dia</h2>
-        <div class="row cols-4">
+      <!-- §1 IDENTIFICAÇÃO -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon ico-indigo">📅</div>
           <div>
-            <label for="data_registro">Data do registro</label>
-            <input id="data_registro" name="data_registro" type="date" required />
+            <div class="sec-title">Identificação do Dia</div>
+            <div class="sec-sub">Data, dia do ciclo e responsável pelo preenchimento</div>
           </div>
-          <div>
-            <label for="dia_acompanhamento">Dia do acompanhamento</label>
-            <input id="dia_acompanhamento" name="dia_acompanhamento" readonly />
+        </div>
+        <div class="fg c4">
+          <div class="field">
+            <label for="data_registro">Data do registro *</label>
+            <input id="data_registro" type="date" required />
           </div>
-          <div>
+          <div class="field">
+            <label for="dia_acompanhamento">Dia do ciclo</label>
+            <input id="dia_acompanhamento" readonly placeholder="Auto" />
+          </div>
+          <div class="field">
             <label for="dia_semana">Dia da semana</label>
-            <input id="dia_semana" name="dia_semana" readonly />
+            <input id="dia_semana" readonly placeholder="Auto" />
           </div>
-          <div>
-            <label for="responsavel">Responsável pelo preenchimento</label>
-            <input id="responsavel" name="responsavel" placeholder="Pai, mãe, avó..." />
+          <div class="field">
+            <label for="responsavel">Responsável</label>
+            <input id="responsavel" placeholder="Pai, mãe, avó…" />
           </div>
         </div>
-      </section>
-
-      <div class="grid two">
-        <section class="card">
-          <h2>🌞 Rotina do dia</h2>
-          <div class="row cols-2">
-            <div>
-              <label for="teve_escola">Teve escola?</label>
-              <select id="teve_escola" name="teve_escola">
-                <option value="">Selecionar</option>
-                <option>Sim</option>
-                <option>Não</option>
-                <option>Férias</option>
-                <option>Final de semana</option>
-              </select>
-            </div>
-            <div>
-              <label for="humor_dia">Humor geral do dia</label>
-              <select id="humor_dia" name="humor_dia">
-                <option value="">Selecionar</option>
-                <option>Muito tranquila</option>
-                <option>Tranquila</option>
-                <option>Normal</option>
-                <option>Agitada</option>
-                <option>Muito agitada</option>
-              </select>
-            </div>
-          </div>
-
-          <label for="atividades_principais">O que fez de mais relevante?</label>
-          <textarea id="atividades_principais" name="atividades_principais" placeholder="Ex.: escola, casa da avó, parque, viagem, festa, consulta, mudança de rotina..."></textarea>
-
-          <div class="row cols-2">
-            <div>
-              <label for="nivel_ansiedade">Ansiedade/antecipação do dia</label>
-              <select id="nivel_ansiedade" name="nivel_ansiedade">
-                <option value="">Selecionar</option>
-                <option>0 - Não percebi</option>
-                <option>1 - Leve</option>
-                <option>2 - Moderada</option>
-                <option>3 - Alta</option>
-                <option>4 - Muito alta</option>
-                <option>5 - Crise/choros intensos</option>
-              </select>
-            </div>
-            <div>
-              <label for="perguntou_amanha">Perguntou muito sobre o dia seguinte?</label>
-              <select id="perguntou_amanha" name="perguntou_amanha">
-                <option value="">Selecionar</option>
-                <option>Não</option>
-                <option>Pouco</option>
-                <option>Moderado</option>
-                <option>Muito</option>
-                <option>Repetidamente</option>
-              </select>
-            </div>
-          </div>
-          <label for="gatilho_emocional">Algum gatilho emocional?</label>
-          <textarea id="gatilho_emocional" name="gatilho_emocional" placeholder="Ex.: mudança de rotina, medo, saudade, briga, frustração, expectativa de passeio..."></textarea>
-        </section>
-
-        <section class="card">
-          <h2>🏃 Atividade física e corpo</h2>
-          <div class="row cols-3">
-            <div>
-              <label for="atividade_fisica">Fez atividade física?</label>
-              <select id="atividade_fisica" name="atividade_fisica">
-                <option value="">Selecionar</option>
-                <option>Não</option>
-                <option>Sim - leve</option>
-                <option>Sim - moderada</option>
-                <option>Sim - intensa</option>
-              </select>
-            </div>
-            <div>
-              <label for="tempo_atividade_min">Duração total</label>
-              <input id="tempo_atividade_min" name="tempo_atividade_min" type="number" min="0" step="5" placeholder="minutos" />
-            </div>
-            <div>
-              <label for="horario_atividade">Horário principal</label>
-              <input id="horario_atividade" name="horario_atividade" type="time" />
-            </div>
-          </div>
-          <label for="tipo_atividade">Tipo de atividade</label>
-          <input id="tipo_atividade" name="tipo_atividade" placeholder="Ex.: bicicleta, caminhada, parquinho, natação, dança..." />
-
-          <div class="row cols-2">
-            <div>
-              <label for="cochilo">Cochilou durante o dia?</label>
-              <select id="cochilo" name="cochilo">
-                <option value="">Selecionar</option>
-                <option>Não</option>
-                <option>Sim - até 30 min</option>
-                <option>Sim - 30 a 60 min</option>
-                <option>Sim - mais de 60 min</option>
-              </select>
-            </div>
-            <div>
-              <label for="horario_cochilo">Horário do cochilo</label>
-              <input id="horario_cochilo" name="horario_cochilo" placeholder="Ex.: 14:00 às 14:40" />
-            </div>
-          </div>
-
-          <label for="sinais_corpo">Sinais físicos percebidos</label>
-          <textarea id="sinais_corpo" name="sinais_corpo" placeholder="Ex.: muita energia, cansaço extremo, pernas inquietas, dor, nariz entupido, tosse, ronco, febre..."></textarea>
-        </section>
       </div>
 
-      <div class="grid two">
-        <section class="card">
-          <h2>📺 Tela, estímulos e rotina pré-sono</h2>
-          <div class="row cols-4">
-            <div>
-              <label for="tela_inicio">Tela início</label>
-              <input id="tela_inicio" name="tela_inicio" type="time" />
-            </div>
-            <div>
-              <label for="tela_fim">Tela fim</label>
-              <input id="tela_fim" name="tela_fim" type="time" />
-            </div>
-            <div>
-              <label for="tempo_tela_auto">Tempo de tela</label>
-              <input id="tempo_tela_auto" name="tempo_tela_auto" readonly placeholder="auto" />
-            </div>
-            <div>
-              <label for="tela_tipo">Tipo de conteúdo</label>
-              <select id="tela_tipo" name="tela_tipo">
-                <option value="">Selecionar</option>
-                <option>Sem tela</option>
-                <option>Desenho calmo</option>
-                <option>Desenho agitado</option>
-                <option>Filme</option>
-                <option>Jogo</option>
-                <option>Outro</option>
-              </select>
-            </div>
+      <!-- §2 ROTINA DO DIA -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon ico-yellow">🌞</div>
+          <div>
+            <div class="sec-title">Rotina do Dia</div>
+            <div class="sec-sub">Humor, escola, ansiedade antecipatória e gatilhos emocionais</div>
           </div>
-          <div class="row cols-2">
-            <div>
-              <label for="musica_calma">Usou música calma?</label>
-              <select id="musica_calma" name="musica_calma">
-                <option value="">Selecionar</option>
-                <option>Não</option>
-                <option>Sim - pouco tempo</option>
-                <option>Sim - até dormir</option>
-                <option>Sim - ficou tocando depois</option>
-              </select>
-            </div>
-            <div>
-              <label for="mapa_amanha">Fez “mapa do amanhã”?</label>
-              <select id="mapa_amanha" name="mapa_amanha">
-                <option value="">Selecionar</option>
-                <option>Não</option>
-                <option>Sim - verbal</option>
-                <option>Sim - visual/desenho</option>
-                <option>Sim - mas gerou mais perguntas</option>
-              </select>
-            </div>
+        </div>
+        <div class="fg c2">
+          <div class="field">
+            <label for="teve_escola">Teve escola?</label>
+            <select id="teve_escola">
+              <option value="">Selecionar</option>
+              <option>Sim</option><option>Não</option>
+              <option>Férias</option><option>Final de semana</option>
+            </select>
           </div>
-          <label for="rotina_pre_sono">Rotina antes de dormir</label>
-          <textarea id="rotina_pre_sono" name="rotina_pre_sono" placeholder="Ex.: banho, pijama, história, oração, conversa curta, luz baixa..."></textarea>
-        </section>
-
-        <section class="card">
-          <h2>🍽️ Alimentação e ingestão</h2>
-          <div class="row cols-2">
-            <div>
-              <label for="jantar_horario">Horário do jantar</label>
-              <input id="jantar_horario" name="jantar_horario" type="time" />
-            </div>
-            <div>
-              <label for="jantar_quantidade">Quantidade no jantar</label>
-              <select id="jantar_quantidade" name="jantar_quantidade">
-                <option value="">Selecionar</option>
-                <option>Comeu bem</option>
-                <option>Comeu médio</option>
-                <option>Comeu pouco</option>
-                <option>Recusou comida</option>
-                <option>Jantou fora da rotina</option>
-              </select>
-            </div>
+          <div class="field">
+            <label for="humor_dia">Humor geral do dia</label>
+            <select id="humor_dia">
+              <option value="">Selecionar</option>
+              <option>Muito tranquila</option><option>Tranquila</option>
+              <option>Normal</option><option>Agitada</option><option>Muito agitada</option>
+            </select>
           </div>
-          <label for="alimentos_relevantes">O que comeu de relevante?</label>
-          <textarea id="alimentos_relevantes" name="alimentos_relevantes" placeholder="Ex.: arroz/feijão/carne, massa, leite, chocolate, açúcar, refrigerante, suco, comida pesada..."></textarea>
-          <div class="row cols-2">
-            <div>
-              <label for="doce_chocolate">Teve doce/chocolate à tarde/noite?</label>
-              <select id="doce_chocolate" name="doce_chocolate">
-                <option value="">Selecionar</option>
-                <option>Não</option>
-                <option>Sim - pouco</option>
-                <option>Sim - moderado</option>
-                <option>Sim - muito</option>
-              </select>
-            </div>
-            <div>
-              <label for="medicacao">Medicação/suplemento no dia</label>
-              <input id="medicacao" name="medicacao" placeholder="Somente se prescrito/orientado. Ex.: antialérgico..." />
-            </div>
+        </div>
+        <div class="fg c2">
+          <div class="field">
+            <label for="nivel_ansiedade">Ansiedade / antecipação</label>
+            <select id="nivel_ansiedade">
+              <option value="">Selecionar</option>
+              <option>0 - Não percebi</option><option>1 - Leve</option>
+              <option>2 - Moderada</option><option>3 - Alta</option>
+              <option>4 - Muito alta</option><option>5 - Crise / choros intensos</option>
+            </select>
           </div>
-        </section>
+          <div class="field">
+            <label for="perguntou_amanha">Perguntou sobre o dia seguinte?</label>
+            <select id="perguntou_amanha">
+              <option value="">Selecionar</option>
+              <option>Não</option><option>Pouco</option>
+              <option>Moderado</option><option>Muito</option><option>Repetidamente</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg">
+          <div class="field">
+            <label for="atividades_principais">O que fez de mais relevante no dia?</label>
+            <textarea id="atividades_principais" placeholder="Ex.: escola, casa da avó, parque, viagem, festa, consulta, mudança de rotina…"></textarea>
+          </div>
+        </div>
+        <div class="fg">
+          <div class="field">
+            <label for="gatilho_emocional">Gatilho emocional observado?</label>
+            <textarea id="gatilho_emocional" placeholder="Ex.: mudança de rotina, medo, saudade, briga, frustração, expectativa de passeio…" style="min-height:60px"></textarea>
+          </div>
+        </div>
       </div>
 
-      <section class="card">
-        <h2>🌙 Sono da noite</h2>
-        <div class="row cols-4">
+      <!-- §3 CORPO E MOVIMENTO -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon ico-green">🏃</div>
           <div>
-            <label for="foi_cama">Foi para cama</label>
-            <input id="foi_cama" name="foi_cama" type="time" />
+            <div class="sec-title">Corpo e Movimento</div>
+            <div class="sec-sub">Atividade física, cochilo e sinais físicos percebidos</div>
           </div>
+        </div>
+        <div class="fg c3">
+          <div class="field">
+            <label for="atividade_fisica">Fez atividade física?</label>
+            <select id="atividade_fisica">
+              <option value="">Selecionar</option>
+              <option>Não</option><option>Sim - leve</option>
+              <option>Sim - moderada</option><option>Sim - intensa</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="tempo_atividade_min">Duração (minutos)</label>
+            <input id="tempo_atividade_min" type="number" min="0" step="5" placeholder="0" />
+          </div>
+          <div class="field">
+            <label for="horario_atividade">Horário principal</label>
+            <input id="horario_atividade" type="time" />
+          </div>
+        </div>
+        <div class="fg">
+          <div class="field">
+            <label for="tipo_atividade">Tipo de atividade</label>
+            <input id="tipo_atividade" placeholder="Ex.: bicicleta, caminhada, parquinho, natação, dança…" />
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="fg c2">
+          <div class="field">
+            <label for="cochilo">Cochilou durante o dia?</label>
+            <select id="cochilo">
+              <option value="">Selecionar</option>
+              <option>Não</option><option>Sim - até 30 min</option>
+              <option>Sim - 30 a 60 min</option><option>Sim - mais de 60 min</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="horario_cochilo">Horário do cochilo</label>
+            <input id="horario_cochilo" placeholder="Ex.: 14:00 às 14:40" />
+          </div>
+        </div>
+        <div class="fg">
+          <div class="field">
+            <label for="sinais_corpo">Sinais físicos percebidos</label>
+            <textarea id="sinais_corpo" placeholder="Ex.: muita energia, cansaço extremo, pernas inquietas, nariz entupido, tosse, febre…" style="min-height:60px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- §4 TELAS E PRÉ-SONO -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon ico-blue">📺</div>
           <div>
+            <div class="sec-title">Telas e Rotina Pré-Sono</div>
+            <div class="sec-sub">Tempo de tela, conteúdo, música e ritual antes de dormir</div>
+          </div>
+        </div>
+        <div class="fg c4">
+          <div class="field">
+            <label for="tela_inicio">Tela — início</label>
+            <input id="tela_inicio" type="time" />
+          </div>
+          <div class="field">
+            <label for="tela_fim">Tela — fim</label>
+            <input id="tela_fim" type="time" />
+          </div>
+          <div class="field">
+            <label for="tempo_tela">Tempo total (auto)</label>
+            <input id="tempo_tela" readonly placeholder="—" />
+          </div>
+          <div class="field">
+            <label for="tela_tipo">Tipo de conteúdo</label>
+            <select id="tela_tipo">
+              <option value="">Selecionar</option>
+              <option>Sem tela</option><option>Desenho calmo</option>
+              <option>Desenho agitado</option><option>Filme</option>
+              <option>Jogo</option><option>Outro</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg c2">
+          <div class="field">
+            <label for="musica_calma">Usou música calma?</label>
+            <select id="musica_calma">
+              <option value="">Selecionar</option>
+              <option>Não</option><option>Sim - pouco tempo</option>
+              <option>Sim - até dormir</option><option>Sim - ficou tocando depois</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="mapa_amanha">Fez "mapa do amanhã"?</label>
+            <select id="mapa_amanha">
+              <option value="">Selecionar</option>
+              <option>Não</option><option>Sim - verbal</option>
+              <option>Sim - visual / desenho</option><option>Sim - mas gerou mais perguntas</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg">
+          <div class="field">
+            <label for="rotina_pre_sono">Rotina antes de dormir</label>
+            <textarea id="rotina_pre_sono" placeholder="Ex.: banho, pijama, história, oração, conversa curta, luz baixa…" style="min-height:60px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- §5 ALIMENTAÇÃO -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon ico-orange">🍽️</div>
+          <div>
+            <div class="sec-title">Alimentação</div>
+            <div class="sec-sub">Jantar, doces à tarde/noite e medicações do dia</div>
+          </div>
+        </div>
+        <div class="fg c2">
+          <div class="field">
+            <label for="jantar_horario">Horário do jantar</label>
+            <input id="jantar_horario" type="time" />
+          </div>
+          <div class="field">
+            <label for="jantar_quantidade">Quantidade no jantar</label>
+            <select id="jantar_quantidade">
+              <option value="">Selecionar</option>
+              <option>Comeu bem</option><option>Comeu médio</option>
+              <option>Comeu pouco</option><option>Recusou comida</option>
+              <option>Jantou fora da rotina</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg c2">
+          <div class="field">
+            <label for="doce_chocolate">Doce / chocolate à tarde ou noite?</label>
+            <select id="doce_chocolate">
+              <option value="">Selecionar</option>
+              <option>Não</option><option>Sim - pouco</option>
+              <option>Sim - moderado</option><option>Sim - muito</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="medicacao">Medicação / suplemento</label>
+            <input id="medicacao" placeholder="Somente se prescrito. Ex.: antialérgico…" />
+          </div>
+        </div>
+        <div class="fg">
+          <div class="field">
+            <label for="alimentos_relevantes">O que comeu de relevante?</label>
+            <textarea id="alimentos_relevantes" placeholder="Ex.: arroz/feijão/carne, massa, leite, chocolate, açúcar, refrigerante…" style="min-height:60px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- §6 SONO DA NOITE -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon ico-purple">🌙</div>
+          <div>
+            <div class="sec-title">Sono da Noite</div>
+            <div class="sec-sub">Horários, total de sono e métricas calculadas automaticamente</div>
+          </div>
+        </div>
+        <div class="fg c4">
+          <div class="field">
+            <label for="foi_cama">Foi para a cama</label>
+            <input id="foi_cama" type="time" />
+          </div>
+          <div class="field">
             <label for="dormiu_hora">Dormiu de fato</label>
-            <input id="dormiu_hora" name="dormiu_hora" type="time" />
+            <input id="dormiu_hora" type="time" />
           </div>
-          <div>
+          <div class="field">
             <label for="acordou_hora">Acordou de manhã</label>
-            <input id="acordou_hora" name="acordou_hora" type="time" />
+            <input id="acordou_hora" type="time" />
           </div>
-          <div>
-            <label for="total_sono_auto">Total aproximado</label>
-            <input id="total_sono_auto" name="total_sono_auto" readonly placeholder="auto" />
-          </div>
-        </div>
-
-        <div class="summary">
-          <div class="metric">
-            <span>Sugestão de despertar leve</span>
-            <strong id="despertarSugerido">--:--</strong>
-            <div class="small">~25 min antes da janela de 2h</div>
-          </div>
-          <div class="metric">
-            <span>Janela crítica estimada</span>
-            <strong id="janelaCritica">--:--</strong>
-            <div class="small">Aprox. 2h depois de dormir</div>
-          </div>
-          <div class="metric">
-            <span>Meta de sono pré-escolar</span>
-            <strong>10–13h</strong>
-            <div class="small">Referência geral por idade</div>
-          </div>
-          <div class="metric">
-            <span>Status do registro</span>
-            <strong id="statusRegistro">Aberto</strong>
-            <div class="small">Salve no fim da manhã seguinte</div>
+          <div class="field">
+            <label for="total_sono">Total aproximado</label>
+            <input id="total_sono" readonly placeholder="Auto" />
           </div>
         </div>
-      </section>
+        <div class="metrics-row">
+          <div class="metric">
+            <div class="metric-label">Despertar sugerido</div>
+            <div class="metric-value" id="m-despertar">—</div>
+            <div class="metric-hint">~1h35 após dormir</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Janela crítica</div>
+            <div class="metric-value" id="m-janela">—</div>
+            <div class="metric-hint">~2h após dormir</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Meta de sono</div>
+            <div class="metric-value">10–13h</div>
+            <div class="metric-hint">Referência pré-escolar</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Status</div>
+            <div class="metric-value" id="m-status" style="font-size:1rem;">Aberto</div>
+            <div class="metric-hint">Salve pela manhã</div>
+          </div>
+        </div>
+      </div>
 
-      <section class="card">
-        <h2>⚠️ Episódio noturno / agitação</h2>
-        <div class="row cols-4">
+      <!-- §7 EPISÓDIO NOTURNO -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon ico-red">⚠️</div>
           <div>
+            <div class="sec-title">Episódio Noturno</div>
+            <div class="sec-sub">Agitação, terror noturno, sonambulismo ou outros episódios</div>
+          </div>
+        </div>
+        <div class="fg c4">
+          <div class="field">
             <label for="teve_episodio">Teve episódio?</label>
-            <select id="teve_episodio" name="teve_episodio">
+            <select id="teve_episodio">
               <option value="">Selecionar</option>
-              <option>Não</option>
-              <option>Sim - leve</option>
-              <option>Sim - moderado</option>
-              <option>Sim - intenso</option>
+              <option>Não</option><option>Sim - leve</option>
+              <option>Sim - moderado</option><option>Sim - intenso</option>
             </select>
           </div>
-          <div>
-            <label for="episodio_hora">Horário do episódio</label>
-            <input id="episodio_hora" name="episodio_hora" type="time" />
+          <div class="field">
+            <label for="episodio_hora">Horário</label>
+            <input id="episodio_hora" type="time" />
           </div>
-          <div>
-            <label for="episodio_duracao">Duração aproximada</label>
-            <input id="episodio_duracao" name="episodio_duracao" placeholder="Ex.: 5 min, 20 min" />
+          <div class="field">
+            <label for="episodio_duracao">Duração</label>
+            <input id="episodio_duracao" placeholder="Ex.: 5 min, 20 min" />
           </div>
-          <div>
+          <div class="field">
             <label for="lembrou_manha">Lembrou no dia seguinte?</label>
-            <select id="lembrou_manha" name="lembrou_manha">
+            <select id="lembrou_manha">
               <option value="">Selecionar</option>
-              <option>Não</option>
-              <option>Pouco</option>
-              <option>Sim</option>
-              <option>Não perguntamos</option>
+              <option>Não</option><option>Pouco</option>
+              <option>Sim</option><option>Não perguntamos</option>
             </select>
           </div>
         </div>
-
-        <label>O que aconteceu? Marque os sinais observados.</label>
-        <div class="checkgrid">
-          <div class="check"><input type="checkbox" name="sinais_episodio" value="Resmungou" id="s1"><label for="s1">Resmungou</label></div>
-          <div class="check"><input type="checkbox" name="sinais_episodio" value="Chorou" id="s2"><label for="s2">Chorou</label></div>
-          <div class="check"><input type="checkbox" name="sinais_episodio" value="Sentou na cama" id="s3"><label for="s3">Sentou na cama</label></div>
-          <div class="check"><input type="checkbox" name="sinais_episodio" value="Levantou" id="s4"><label for="s4">Levantou</label></div>
-          <div class="check"><input type="checkbox" name="sinais_episodio" value="Veio ao quarto dos pais" id="s5"><label for="s5">Veio ao quarto dos pais</label></div>
-          <div class="check"><input type="checkbox" name="sinais_episodio" value="Parecia sonâmbula/confusa" id="s6"><label for="s6">Parecia sonâmbula/confusa</label></div>
-          <div class="check"><input type="checkbox" name="sinais_episodio" value="Bateu pé/pernas" id="s7"><label for="s7">Bateu pé/pernas</label></div>
-          <div class="check"><input type="checkbox" name="sinais_episodio" value="Suou muito" id="s8"><label for="s8">Suou muito</label></div>
-          <div class="check"><input type="checkbox" name="sinais_episodio" value="Ronco/respiração alterada" id="s9"><label for="s9">Ronco/respiração alterada</label></div>
+        <div class="field" style="margin-top:14px">
+          <label>Sinais observados durante o episódio</label>
+          <div class="check-grid">
+            <label class="check-item"><input type="checkbox" name="sinais_ep" value="Resmungou"><span>Resmungou</span></label>
+            <label class="check-item"><input type="checkbox" name="sinais_ep" value="Chorou"><span>Chorou</span></label>
+            <label class="check-item"><input type="checkbox" name="sinais_ep" value="Sentou na cama"><span>Sentou na cama</span></label>
+            <label class="check-item"><input type="checkbox" name="sinais_ep" value="Levantou"><span>Levantou</span></label>
+            <label class="check-item"><input type="checkbox" name="sinais_ep" value="Veio ao quarto dos pais"><span>Veio ao quarto dos pais</span></label>
+            <label class="check-item"><input type="checkbox" name="sinais_ep" value="Parecia sonâmbula/confusa"><span>Parecia sonâmbula/confusa</span></label>
+            <label class="check-item"><input type="checkbox" name="sinais_ep" value="Bateu pé/pernas"><span>Bateu pé/pernas</span></label>
+            <label class="check-item"><input type="checkbox" name="sinais_ep" value="Suou muito"><span>Suou muito</span></label>
+            <label class="check-item"><input type="checkbox" name="sinais_ep" value="Ronco/respiração alterada"><span>Ronco/respiração alterada</span></label>
+          </div>
         </div>
-
-        <div class="row cols-3">
-          <div>
-            <label for="intervencao">Como vocês agiram?</label>
-            <select id="intervencao" name="intervencao">
+        <div class="fg c3" style="margin-top:14px">
+          <div class="field">
+            <label for="intervencao">Como agiram?</label>
+            <select id="intervencao">
               <option value="">Selecionar</option>
               <option>Não precisamos intervir</option>
               <option>Conduzimos de volta à cama</option>
@@ -641,9 +1016,9 @@
               <option>Outro</option>
             </select>
           </div>
-          <div>
+          <div class="field">
             <label for="despertar_programado_feito">Fez despertar programado?</label>
-            <select id="despertar_programado_feito" name="despertar_programado_feito">
+            <select id="despertar_programado_feito">
               <option value="">Selecionar</option>
               <option>Não</option>
               <option>Sim - mexeu/tocou levemente</option>
@@ -651,484 +1026,690 @@
               <option>Sim - não funcionou</option>
             </select>
           </div>
-          <div>
+          <div class="field">
             <label for="impacto_pais">Impacto no sono dos pais</label>
-            <select id="impacto_pais" name="impacto_pais">
+            <select id="impacto_pais">
               <option value="">Selecionar</option>
-              <option>Sem impacto</option>
-              <option>Leve</option>
-              <option>Moderado</option>
-              <option>Alto</option>
-              <option>Muito alto</option>
+              <option>Sem impacto</option><option>Leve</option>
+              <option>Moderado</option><option>Alto</option><option>Muito alto</option>
             </select>
           </div>
         </div>
+        <div class="fg" style="margin-top:14px">
+          <div class="field">
+            <label for="observacoes_noite">Observações da noite</label>
+            <textarea id="observacoes_noite" placeholder="Descreva pontos objetivos. Ex.: acordou confusa, chorou 10 min, não respondeu, voltou sozinha…"></textarea>
+          </div>
+        </div>
+      </div>
 
-        <label for="observacoes_noite">Observações da noite</label>
-        <textarea id="observacoes_noite" name="observacoes_noite" placeholder="Descreva somente pontos objetivos. Ex.: acordou confusa, chorou 10 min, não respondeu, voltou sozinha, etc."></textarea>
-      </section>
-
-      <section class="card">
-        <h2>📌 Resumo para análise</h2>
-        <div class="row cols-2">
+      <!-- §8 ANÁLISE E RESUMO -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon ico-teal">📌</div>
           <div>
+            <div class="sec-title">Resumo e Próximos Passos</div>
+            <div class="sec-sub">Hipóteses sobre o que influenciou e o que testar amanhã</div>
+          </div>
+        </div>
+        <div class="fg c2">
+          <div class="field">
             <label for="possivel_gatilho">O que pode ter influenciado?</label>
-            <textarea id="possivel_gatilho" name="possivel_gatilho" placeholder="Ex.: dia muito cheio, pouca atividade física, muita ansiedade, tela mais tarde, comeu pouco, rotina diferente..."></textarea>
+            <textarea id="possivel_gatilho" placeholder="Ex.: dia muito cheio, pouca atividade física, muita ansiedade, tela mais tarde, comeu pouco…"></textarea>
           </div>
-          <div>
+          <div class="field">
             <label for="acao_teste_proximo_dia">Ação para testar no próximo dia</label>
-            <textarea id="acao_teste_proximo_dia" name="acao_teste_proximo_dia" placeholder="Ex.: bicicleta mais cedo, mapa visual do amanhã, despertar programado, reduzir doce, dormir 20 min mais cedo..."></textarea>
+            <textarea id="acao_teste_proximo_dia" placeholder="Ex.: bicicleta mais cedo, mapa visual do amanhã, despertar programado, reduzir doce…"></textarea>
           </div>
         </div>
 
-        <div id="editModeBanner" class="status"></div>
-
-        <div class="actions">
-          <button id="saveSendBtn" type="button" class="ok" onclick="saveAndSend()">✅ Salvar e enviar para planilha</button>
-          <button id="saveLocalBtn" type="button" class="secondary" onclick="saveLocalOnly()">💾 Salvar somente neste navegador</button>
-          <button id="newRecordBtn" type="button" class="ghost" onclick="startNewRecord()" style="display:none">🆕 Iniciar novo registro</button>
-          <button type="button" class="ghost" onclick="exportLocalCsv()">⬇️ Exportar registros locais em CSV</button>
-          <button type="button" class="ghost" onclick="clearFormKeepConfig()">🧹 Limpar formulário</button>
-          <button type="button" class="danger" onclick="clearLocalRecords()">🗑️ Apagar registros locais</button>
+        <!-- STICKY ACTIONS -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-success" onclick="saveRecord()" id="save-btn">
+            ✅ <span id="save-label">Salvar no Supabase</span>
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="clearForm()">🧹 Limpar</button>
+          <button type="button" class="btn btn-secondary" id="new-btn" style="display:none" onclick="newRecord()">🆕 Novo registro</button>
+          <button type="button" class="btn btn-ghost"      onclick="exportCSV()">⬇️ Exportar CSV</button>
         </div>
-        <div id="formStatus" class="status"></div>
-      </section>
+      </div>
+
     </form>
+  </div><!-- /panel-form -->
 
-    <section class="card no-print">
-      <h2>📊 Registros salvos localmente</h2>
-      <p class="small">Estes dados ficam neste navegador como cópia de segurança. O envio para a planilha depende do Google Apps Script configurado.</p>
-      <div id="localRecords"></div>
-      <div id="csvPreview"></div>
-    </section>
-  </main>
+  <!-- ───── PAINEL: HISTÓRICO ───── -->
+  <div class="tab-panel" id="panel-history">
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon ico-indigo">📋</div>
+        <div>
+          <div class="sec-title">Histórico de Registros</div>
+          <div class="sec-sub" id="hist-sub">Carregando…</div>
+        </div>
+      </div>
 
+      <div class="hist-controls">
+        <div class="field">
+          <label>De</label>
+          <input type="date" id="flt-from" onchange="applyFilters()" />
+        </div>
+        <div class="field">
+          <label>Até</label>
+          <input type="date" id="flt-to" onchange="applyFilters()" />
+        </div>
+        <div class="field">
+          <label>Episódio</label>
+          <select id="flt-ep" onchange="applyFilters()">
+            <option value="">Todos</option>
+            <option value="nao">Sem episódio</option>
+            <option value="sim">Com episódio</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Humor</label>
+          <select id="flt-humor" onchange="applyFilters()">
+            <option value="">Todos</option>
+            <option>Muito tranquila</option><option>Tranquila</option>
+            <option>Normal</option><option>Agitada</option><option>Muito agitada</option>
+          </select>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="clearFilters()" style="align-self:flex-end;margin-bottom:1px">✕ Limpar</button>
+      </div>
+
+      <div id="records-list">
+        <div class="loader"><div class="spin"></div> Carregando registros…</div>
+      </div>
+    </div>
+  </div><!-- /panel-history -->
+
+  <!-- ───── PAINEL: ANÁLISE ───── -->
+  <div class="tab-panel" id="panel-analytics">
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon ico-purple">📊</div>
+        <div>
+          <div class="sec-title">Análise do Acompanhamento</div>
+          <div class="sec-sub">Padrões e tendências dos registros</div>
+        </div>
+      </div>
+      <div class="stats-row" id="stats-row">
+        <div class="loader" style="grid-column:1/-1"><div class="spin"></div></div>
+      </div>
+      <div id="analytics-episodes"></div>
+    </div>
+  </div><!-- /panel-analytics -->
+
+</div><!-- /container -->
+
+<!-- ═══════ DELETE MODAL ═══════ -->
+<div class="modal-bg" id="del-modal">
+  <div class="modal">
+    <h3>🗑️ Excluir registro</h3>
+    <p>Tem certeza? Esta ação não pode ser desfeita.<br>O registro do dia <strong id="del-date"></strong> será removido permanentemente do Supabase.</p>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger"    onclick="confirmDelete()">Excluir definitivamente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ TOASTS ═══════ -->
+<div id="toasts"></div>
+
+<!-- ═══════════════════ SCRIPT ═══════════════════ -->
 <script>
-const STORAGE_SETTINGS = "mayaSonoSettings_v1";
-const STORAGE_RECORDS = "mayaSonoRecords_v1";
-let editingLocalId = null;
+/* ─────────────────────────────────────────────
+   CONFIG — edite aqui se mudar o projeto
+   ───────────────────────────────────────────── */
+const SUPABASE_URL  = 'https://wbnuqhdgptwgpdvtwahg.supabase.co';
+const SUPABASE_KEY  = 'sb_publishable_1vV430ogrj1GHnmJ5YLTag_X6DFMvIQ';
+const TABLE        = 'registros_sono';
 
-const FIELD_IDS = [
-  "data_registro","dia_acompanhamento","dia_semana","responsavel",
-  "teve_escola","humor_dia","atividades_principais","nivel_ansiedade","perguntou_amanha","gatilho_emocional",
-  "atividade_fisica","tempo_atividade_min","horario_atividade","tipo_atividade","cochilo","horario_cochilo","sinais_corpo",
-  "tela_inicio","tela_fim","tempo_tela_auto","tela_tipo","musica_calma","mapa_amanha","rotina_pre_sono",
-  "jantar_horario","jantar_quantidade","alimentos_relevantes","doce_chocolate","medicacao",
-  "foi_cama","dormiu_hora","acordou_hora","total_sono_auto",
-  "teve_episodio","episodio_hora","episodio_duracao","lembrou_manha","intervencao","despertar_programado_feito","impacto_pais",
-  "observacoes_noite","possivel_gatilho","acao_teste_proximo_dia"
-];
+/* SQL de criação da tabela (exibido no setup box) */
+const SETUP_SQL = `-- Execute no SQL Editor do Supabase
+CREATE TABLE IF NOT EXISTS registros_sono (
+  id                        UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at                TIMESTAMPTZ DEFAULT NOW(),
+  updated_at                TIMESTAMPTZ DEFAULT NOW(),
+  data_registro             DATE,
+  dia_acompanhamento        TEXT,
+  dia_semana                TEXT,
+  responsavel               TEXT,
+  teve_escola               TEXT,
+  humor_dia                 TEXT,
+  atividades_principais     TEXT,
+  nivel_ansiedade           TEXT,
+  perguntou_amanha          TEXT,
+  gatilho_emocional         TEXT,
+  atividade_fisica          TEXT,
+  tempo_atividade_min       TEXT,
+  horario_atividade         TEXT,
+  tipo_atividade            TEXT,
+  cochilo                   TEXT,
+  horario_cochilo           TEXT,
+  sinais_corpo              TEXT,
+  tela_inicio               TEXT,
+  tela_fim                  TEXT,
+  tempo_tela                TEXT,
+  tela_tipo                 TEXT,
+  musica_calma              TEXT,
+  mapa_amanha               TEXT,
+  rotina_pre_sono           TEXT,
+  jantar_horario            TEXT,
+  jantar_quantidade         TEXT,
+  alimentos_relevantes      TEXT,
+  doce_chocolate            TEXT,
+  medicacao                 TEXT,
+  foi_cama                  TEXT,
+  dormiu_hora               TEXT,
+  acordou_hora              TEXT,
+  total_sono                TEXT,
+  teve_episodio             TEXT,
+  episodio_hora             TEXT,
+  episodio_duracao          TEXT,
+  lembrou_manha             TEXT,
+  sinais_episodio           TEXT,
+  intervencao               TEXT,
+  despertar_programado_feito TEXT,
+  impacto_pais              TEXT,
+  observacoes_noite         TEXT,
+  possivel_gatilho          TEXT,
+  acao_teste_proximo_dia    TEXT
+);
 
-function pad(n){ return String(n).padStart(2,"0"); }
-function todayISO(){
+-- Habilitar RLS e permitir acesso público (site aberto no GitHub)
+ALTER TABLE registros_sono ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "public_all" ON registros_sono
+  FOR ALL USING (true) WITH CHECK (true);`;
+
+/* ─────────────────────────────────────────────
+   SUPABASE CLIENT
+   ───────────────────────────────────────────── */
+const { createClient } = window.supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ─────────────────────────────────────────────
+   STATE
+   ───────────────────────────────────────────── */
+let S = {
+  editingId:    null,
+  allRecords:   [],
+  filtered:     [],
+  deleteTarget: null,
+  connected:    false
+};
+
+/* ─────────────────────────────────────────────
+   UTILS
+   ───────────────────────────────────────────── */
+const pad = n => String(n).padStart(2,'0');
+const todayISO = () => {
   const d = new Date();
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
-function parseISODate(value){
-  if(!value) return null;
-  const [y,m,d] = value.split("-").map(Number);
-  return new Date(y, m-1, d);
-}
-function dateDiffDays(a,b){
-  const ms = parseISODate(b) - parseISODate(a);
-  return Math.floor(ms / 86400000);
-}
-function weekdayBR(value){
-  const d = parseISODate(value);
-  if(!d) return "";
-  return d.toLocaleDateString("pt-BR", {weekday:"long"});
-}
-function timeToMinutes(t){
-  if(!t || !/^\d{2}:\d{2}$/.test(t)) return null;
-  const [h,m]=t.split(":").map(Number);
-  return h*60+m;
-}
-function minutesToTime(mins){
-  if(mins == null || Number.isNaN(mins)) return "--:--";
-  mins = ((mins % 1440)+1440)%1440;
-  return `${pad(Math.floor(mins/60))}:${pad(mins%60)}`;
-}
-function diffTime(start,end){
-  const a=timeToMinutes(start), b=timeToMinutes(end);
-  if(a == null || b == null) return "";
-  let diff = b - a;
-  if(diff < 0) diff += 1440;
-  const h = Math.floor(diff/60);
-  const m = diff%60;
-  if(h === 0) return `${m} min`;
-  return `${h}h ${pad(m)}min`;
-}
-function showStatus(id, msg, type="ok"){
-  const el = document.getElementById(id);
-  el.className = `status show ${type}`;
-  el.textContent = msg;
-  setTimeout(()=>{ el.className = "status"; }, 6500);
-}
-function getSettings(){
-  try { return JSON.parse(localStorage.getItem(STORAGE_SETTINGS) || "{}"); }
-  catch(e){ return {}; }
-}
-function setSettings(s){
-  localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(s));
-}
-function getRecords(){
-  try { return JSON.parse(localStorage.getItem(STORAGE_RECORDS) || "[]"); }
-  catch(e){ return []; }
-}
-function setRecords(records){
-  localStorage.setItem(STORAGE_RECORDS, JSON.stringify(records));
-}
-function saveSettings(){
-  const s = {
-    scriptUrl: document.getElementById("scriptUrl").value.trim(),
-    csvUrl: document.getElementById("csvUrl").value.trim(),
-    startDate: document.getElementById("startDate").value,
-    childInitial: document.getElementById("childInitial").value.trim() || "Maya",
-    routineTarget: document.getElementById("routineTarget").value
-  };
-  setSettings(s);
-  updateComputedFields();
-  showStatus("configStatus","Configuração salva neste navegador.","ok");
-}
-function setTodayAsStart(){
-  document.getElementById("startDate").value = todayISO();
-  saveSettings();
-}
-function loadSettings(){
-  const s = getSettings();
-  document.getElementById("scriptUrl").value = s.scriptUrl || "https://script.google.com/macros/s/AKfycbyKHVUSLoofnQWgKCiTL4iKctDLf6z11Sf8wptVBO5mz4Icbe_-246hGfpERjhcHNS2/exec";
-  document.getElementById("csvUrl").value = s.csvUrl || "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWnpuJrUrL4ijLBYJ7DiurlxINsrSBNYHfcz3RfDjZg6nJ0UtQM8HhBFDlwWGx9Udl5Dc6NfzHgux0/pub?gid=0&single=true&output=csv";
-  document.getElementById("startDate").value = s.startDate || todayISO();
-  document.getElementById("childInitial").value = s.childInitial || "Maya";
-  document.getElementById("routineTarget").value = s.routineTarget || "20:30";
-}
-function updateComputedFields(){
-  const data = document.getElementById("data_registro").value || todayISO();
-  const start = document.getElementById("startDate").value || data;
-  const diff = dateDiffDays(start, data);
-  const dia = (diff >= 0 && diff <= 13) ? `Dia ${diff+1} de 14` : `Fora do ciclo de 14 dias`;
-  document.getElementById("dia_acompanhamento").value = dia;
-  document.getElementById("badgeDia").textContent = dia;
-  document.getElementById("dia_semana").value = weekdayBR(data);
+};
+const parseDate = v => { if(!v) return null; const [y,m,d]=v.split('-').map(Number); return new Date(y,m-1,d); };
+const dateDiff  = (a,b) => { const ms=parseDate(b)-parseDate(a); return isNaN(ms)?null:Math.floor(ms/86400000); };
+const weekdayBR = v => { const d=parseDate(v); return d?d.toLocaleDateString('pt-BR',{weekday:'long'}):'' };
+const t2m = t => { if(!t||!/^\d{2}:\d{2}/.test(t)) return null; const[h,m]=t.split(':').map(Number); return h*60+m; };
+const m2t = m => { if(m==null||isNaN(m)) return '—'; m=((m%1440)+1440)%1440; return `${pad(Math.floor(m/60))}:${pad(m%60)}`; };
+const diffT = (s,e) => { const a=t2m(s),b=t2m(e); if(a==null||b==null) return ''; let d=b-a; if(d<0)d+=1440; const h=Math.floor(d/60),mi=d%60; return h===0?`${mi}min`:`${h}h${pad(mi)}min`; };
+const esc = v => String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+const checkedVals = name => [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(x=>x.value);
+const setChecked  = (name,vals) => {
+  const set=new Set(Array.isArray(vals)?vals:String(vals||'').split(';').map(s=>s.trim()).filter(Boolean));
+  document.querySelectorAll(`input[name="${name}"]`).forEach(cb=>cb.checked=set.has(cb.value));
+};
+const MONTHS_BR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const dayNum    = v => { const d=parseDate(v); return d?d.getDate():'—'; };
+const monthStr  = v => { const d=parseDate(v); return d?MONTHS_BR[d.getMonth()]:''; };
 
-  const tela = diffTime(document.getElementById("tela_inicio").value, document.getElementById("tela_fim").value);
-  document.getElementById("tempo_tela_auto").value = tela;
+/* ─────────────────────────────────────────────
+   CAMPOS CALCULADOS (tempo real)
+   ───────────────────────────────────────────── */
+const FIELDS = [
+  'data_registro','dia_acompanhamento','dia_semana','responsavel',
+  'teve_escola','humor_dia','atividades_principais','nivel_ansiedade','perguntou_amanha','gatilho_emocional',
+  'atividade_fisica','tempo_atividade_min','horario_atividade','tipo_atividade','cochilo','horario_cochilo','sinais_corpo',
+  'tela_inicio','tela_fim','tempo_tela','tela_tipo','musica_calma','mapa_amanha','rotina_pre_sono',
+  'jantar_horario','jantar_quantidade','alimentos_relevantes','doce_chocolate','medicacao',
+  'foi_cama','dormiu_hora','acordou_hora','total_sono',
+  'teve_episodio','episodio_hora','episodio_duracao','lembrou_manha',
+  'intervencao','despertar_programado_feito','impacto_pais',
+  'observacoes_noite','possivel_gatilho','acao_teste_proximo_dia'
+];
 
-  const totalSono = diffTime(document.getElementById("dormiu_hora").value, document.getElementById("acordou_hora").value);
-  document.getElementById("total_sono_auto").value = totalSono;
+function recalc() {
+  const data  = document.getElementById('data_registro').value || todayISO();
+  const start = localStorage.getItem('maya_start') || data;
+  const diff  = dateDiff(start, data);
+  const dia   = (diff!=null && diff>=0 && diff<=13) ? `Dia ${diff+1} de 14` : (diff>13?'Após 14 dias':'Fora do ciclo');
+  el('dia_acompanhamento').value = dia;
+  el('dia_semana').value         = weekdayBR(data);
+  el('day-pill').textContent     = dia;
 
-  const dormiu = timeToMinutes(document.getElementById("dormiu_hora").value);
-  if(dormiu != null){
-    document.getElementById("despertarSugerido").textContent = minutesToTime(dormiu + 95);
-    document.getElementById("janelaCritica").textContent = minutesToTime(dormiu + 120);
+  el('tempo_tela').value  = diffT(el('tela_inicio').value, el('tela_fim').value);
+  el('total_sono').value  = diffT(el('dormiu_hora').value, el('acordou_hora').value);
+
+  const dm = t2m(el('dormiu_hora').value);
+  el('m-despertar').textContent = dm!=null ? m2t(dm+95)  : '—';
+  el('m-janela').textContent    = dm!=null ? m2t(dm+120) : '—';
+}
+function el(id) { return document.getElementById(id); }
+
+/* ─────────────────────────────────────────────
+   COLETA E PREENCHIMENTO DO FORMULÁRIO
+   ───────────────────────────────────────────── */
+function collectForm() {
+  recalc();
+  const rec = { updated_at: new Date().toISOString() };
+  FIELDS.forEach(id => { const e=el(id); rec[id] = e ? e.value : ''; });
+  rec.sinais_episodio = checkedVals('sinais_ep').join('; ');
+  return rec;
+}
+
+function fillForm(rec) {
+  FIELDS.forEach(id => { const e=el(id); if(e && rec[id]!==undefined) e.value = rec[id]??''; });
+  setChecked('sinais_ep', rec.sinais_episodio || '');
+  recalc();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function clearForm() {
+  FIELDS.forEach(id => { const e=el(id); if(e) e.value=''; });
+  document.querySelectorAll('input[name="sinais_ep"]').forEach(cb=>cb.checked=false);
+  el('data_registro').value = todayISO();
+  setEditMode(null);
+  recalc();
+  toast('Formulário limpo','ok');
+}
+
+function newRecord() { clearForm(); toast('Novo registro iniciado','ok'); }
+
+/* ─────────────────────────────────────────────
+   MODO EDIÇÃO
+   ───────────────────────────────────────────── */
+function setEditMode(id) {
+  S.editingId = id;
+  const banner   = el('edit-banner');
+  const saveLabel = el('save-label');
+  const newBtn   = el('new-btn');
+  const mStatus  = el('m-status');
+  if (id) {
+    const r = S.allRecords.find(x=>x.id===id);
+    banner.className = 'edit-banner show';
+    el('banner-detail').textContent = `Registro de ${r?.data_registro||'?'} — ao salvar, será atualizado no Supabase`;
+    saveLabel.textContent  = 'Atualizar no Supabase';
+    newBtn.style.display   = 'inline-flex';
+    if(mStatus) mStatus.textContent = 'Editando';
   } else {
-    document.getElementById("despertarSugerido").textContent = "--:--";
-    document.getElementById("janelaCritica").textContent = "--:--";
+    banner.className = 'edit-banner';
+    saveLabel.textContent  = 'Salvar no Supabase';
+    newBtn.style.display   = 'none';
+    if(mStatus) mStatus.textContent = 'Aberto';
   }
 }
-function getCheckboxValues(name){
-  return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(x=>x.value);
-}
-function setCheckboxValues(name, values){
-  const set = new Set(Array.isArray(values) ? values : String(values||"").split(";").map(x=>x.trim()).filter(Boolean));
-  document.querySelectorAll(`input[name="${name}"]`).forEach(cb => cb.checked = set.has(cb.value));
-}
-function collectForm(){
-  updateComputedFields();
-  const s = getSettings();
-  const data = {};
-  data.data_envio = new Date().toISOString();
-  data.crianca = document.getElementById("childInitial").value.trim() || "Maya";
-  FIELD_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    data[id] = el ? el.value : "";
-  });
-  data.sinais_episodio = getCheckboxValues("sinais_episodio").join("; ");
-  data.despertar_sugerido = document.getElementById("despertarSugerido").textContent;
-  data.janela_critica = document.getElementById("janelaCritica").textContent;
-  data.origem = "HTML Diario Sono Maya";
-  return data;
-}
-function fillForm(record){
-  FIELD_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    if(el && record[id] !== undefined) el.value = record[id];
-  });
-  setCheckboxValues("sinais_episodio", record.sinais_episodio || "");
-  updateComputedFields();
-  window.scrollTo({top:0, behavior:"smooth"});
-}
-function saveLocalOnly(){
-  const data = collectForm();
-  const records = getRecords();
-  const idx = editingLocalId ? records.findIndex(r => r.local_id === editingLocalId) : -1;
 
-  if(idx >= 0){
-    const previous = records[idx];
-    data.local_id = previous.local_id;
-    data.data_envio = previous.data_envio || data.data_envio;
-    data.enviado_planilha = previous.enviado_planilha || false;
-    data.status_envio = previous.status_envio || "Editado localmente";
-    data.data_ultima_edicao = new Date().toISOString();
-    records[idx] = {...previous, ...data};
-    setRecords(records);
-    renderLocalRecords();
-    setEditMode(records[idx]);
-    showStatus("formStatus","Registro atualizado no mesmo formulário. Não foi criada uma nova cópia local.","ok");
-    return;
-  }
-
-  const key = `${data.data_registro}_${data.dia_acompanhamento}_${Date.now()}`;
-  data.local_id = key;
-  data.enviado_planilha = false;
-  records.push(data);
-  setRecords(records);
-  renderLocalRecords();
-  setEditMode(data);
-  showStatus("formStatus","Registro salvo neste navegador. Você pode continuar editando este mesmo formulário.","warn");
-}
-function saveAndSend(){
-  const s = getSettings();
-  const data = collectForm();
-  const records = getRecords();
-  const idx = editingLocalId ? records.findIndex(r => r.local_id === editingLocalId) : -1;
-
-  if(idx >= 0){
-    const previous = records[idx];
-    data.local_id = previous.local_id;
-    data.data_envio = previous.data_envio || data.data_envio;
-    data.enviado_planilha = previous.enviado_planilha || false;
-    data.status_envio = previous.status_envio || "Editado e preparado para reenvio";
-    data.data_ultima_edicao = new Date().toISOString();
-    records[idx] = {...previous, ...data};
-  } else {
-    data.local_id = `${data.data_registro}_${Date.now()}`;
-    data.enviado_planilha = false;
-    records.push(data);
-  }
-
-  setRecords(records);
-  renderLocalRecords();
-  setEditMode(data);
-
-  if(!s.scriptUrl || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(s.scriptUrl)){
-    showStatus("formStatus","Salvei localmente, mas falta configurar a URL do Google Apps Script para enviar à planilha.","warn");
-    return;
-  }
-
-  try{
-    postToAppsScript(s.scriptUrl, data);
-    const updated = getRecords();
-    const savedIdx = updated.findIndex(r => r.local_id === data.local_id);
-    if(savedIdx >= 0){
-      updated[savedIdx].enviado_planilha = true;
-      updated[savedIdx].status_envio = idx >= 0 ? "Registro editado e reenviado via formulário HTML" : "Enviado via formulário HTML";
-      updated[savedIdx].data_ultima_edicao = data.data_ultima_edicao || updated[savedIdx].data_ultima_edicao || "";
-      setRecords(updated);
-      setEditMode(updated[savedIdx]);
+/* ─────────────────────────────────────────────
+   SUPABASE — CRUD
+   ───────────────────────────────────────────── */
+async function checkConnection() {
+  try {
+    const { error } = await sb.from(TABLE).select('id').limit(1);
+    if (error) {
+      if (error.code==='42P01' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        el('setup-sql').textContent = SETUP_SQL;
+        el('setup-box').classList.add('show');
+        setConn(false,'Tabela não criada');
+        return false;
+      }
+      throw error;
     }
-    renderLocalRecords();
-    document.getElementById("statusRegistro").textContent = idx >= 0 ? "Editado" : "Enviado";
-    showStatus("formStatus", idx >= 0 ? "Registro atualizado no mesmo formulário e reenviado para a planilha." : "Registro enviado para a planilha e salvo como backup local.","ok");
-  }catch(err){
-    showStatus("formStatus","Salvei localmente, mas houve falha ao tentar enviar. Verifique a URL do Apps Script.", "err");
+    setConn(true,'Conectado ao Supabase');
+    return true;
+  } catch(e) {
+    setConn(false,'Sem conexão');
+    return false;
   }
 }
-function postToAppsScript(url, data){
-  const iframe = document.getElementById("hiddenSubmitFrame");
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = url;
-  form.target = "hiddenSubmitFrame";
-  form.style.display = "none";
 
-  const input = document.createElement("input");
-  input.type = "hidden";
-  input.name = "payload";
-  input.value = JSON.stringify(data);
-  form.appendChild(input);
+function setConn(ok, label) {
+  S.connected = ok;
+  el('conn-dot').className = ok ? 'dot pulse' : 'dot off';
+  el('conn-label').textContent = label;
+}
 
-  document.body.appendChild(form);
-  form.submit();
-  setTimeout(()=> form.remove(), 1200);
+async function loadRecords() {
+  try {
+    const { data, error } = await sb.from(TABLE).select('*').order('data_registro',{ascending:false});
+    if (error) throw error;
+    S.allRecords = data || [];
+    S.filtered   = [...S.allRecords];
+    el('tc-hist').textContent = S.allRecords.length;
+    // save oldest as start date
+    if (S.allRecords.length && !localStorage.getItem('maya_start')) {
+      const oldest = [...S.allRecords].sort((a,b)=>a.data_registro>b.data_registro?1:-1)[0];
+      if (oldest) localStorage.setItem('maya_start', oldest.data_registro);
+    }
+    return S.allRecords;
+  } catch(e) {
+    toast('Erro ao carregar: '+e.message,'err');
+    return [];
+  }
 }
-function clearFormKeepConfig(){
-  if(!confirm("Limpar todos os campos do formulário atual?")) return;
-  document.getElementById("sleepForm").reset();
-  document.getElementById("data_registro").value = todayISO();
-  document.getElementById("teve_episodio").value = "";
-  setEditMode(null);
-  updateComputedFields();
+
+async function saveRecord() {
+  const rec = collectForm();
+  if (!rec.data_registro) { toast('Informe a data do registro!','warn'); return; }
+  el('save-btn').disabled = true;
+  try {
+    if (S.editingId) {
+      const { error } = await sb.from(TABLE).update(rec).eq('id', S.editingId);
+      if (error) throw error;
+      toast('Registro atualizado ✅','ok');
+      el('m-status').textContent = 'Atualizado';
+    } else {
+      const { data, error } = await sb.from(TABLE).insert([rec]).select();
+      if (error) throw error;
+      if (data?.[0]) { S.allRecords.unshift(data[0]); setEditMode(data[0].id); }
+      toast('Registro salvo com sucesso ✅','ok');
+      el('m-status').textContent = 'Salvo';
+    }
+    await loadRecords();
+    renderHistory();
+    renderAnalytics();
+  } catch(e) {
+    toast('Erro ao salvar: '+e.message,'err');
+  } finally {
+    el('save-btn').disabled = false;
+  }
 }
-function startNewRecord(){
-  document.getElementById("sleepForm").reset();
-  document.getElementById("data_registro").value = todayISO();
-  document.getElementById("teve_episodio").value = "";
-  setEditMode(null);
-  updateComputedFields();
-  showStatus("formStatus","Novo registro iniciado. Ao salvar, será criada uma nova entrada local.","ok");
+
+function editRecord(id) {
+  const rec = S.allRecords.find(r=>r.id===id);
+  if (!rec) return;
+  fillForm(rec);
+  setEditMode(id);
+  goTab('form');
+  toast('Registro aberto para edição ✏️','ok');
 }
-function clearLocalRecords(){
-  if(!confirm("Apagar todos os registros salvos localmente neste navegador? A planilha não será alterada.")) return;
-  setRecords([]);
-  renderLocalRecords();
-  showStatus("formStatus","Registros locais apagados.","warn");
+
+function deleteRecord(id) {
+  const rec = S.allRecords.find(r=>r.id===id);
+  S.deleteTarget = id;
+  el('del-date').textContent = rec?.data_registro || '?';
+  el('del-modal').classList.add('show');
 }
-function escapeHtml(v){
-  return String(v ?? "").replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+
+async function confirmDelete() {
+  closeModal();
+  if (!S.deleteTarget) return;
+  try {
+    const { error } = await sb.from(TABLE).delete().eq('id', S.deleteTarget);
+    if (error) throw error;
+    S.allRecords = S.allRecords.filter(r=>r.id!==S.deleteTarget);
+    S.filtered   = S.filtered.filter(r=>r.id!==S.deleteTarget);
+    if (S.editingId === S.deleteTarget) clearForm();
+    S.deleteTarget = null;
+    el('tc-hist').textContent = S.allRecords.length;
+    renderHistory();
+    renderAnalytics();
+    toast('Registro excluído','ok');
+  } catch(e) {
+    toast('Erro ao excluir: '+e.message,'err');
+  }
 }
-function renderLocalRecords(){
-  const records = getRecords();
-  const el = document.getElementById("localRecords");
-  if(!records.length){
-    el.innerHTML = `<p class="small">Nenhum registro local ainda.</p>`;
+
+function closeModal() { el('del-modal').classList.remove('show'); }
+
+/* ─────────────────────────────────────────────
+   FILTROS
+   ───────────────────────────────────────────── */
+function applyFilters() {
+  const from  = el('flt-from').value;
+  const to    = el('flt-to').value;
+  const ep    = el('flt-ep').value;
+  const humor = el('flt-humor').value;
+  S.filtered = S.allRecords.filter(r => {
+    if (from && r.data_registro < from) return false;
+    if (to   && r.data_registro > to)   return false;
+    if (ep==='nao' && r.teve_episodio!=='Não') return false;
+    if (ep==='sim' && !r.teve_episodio?.startsWith('Sim')) return false;
+    if (humor && r.humor_dia !== humor) return false;
+    return true;
+  });
+  renderHistory();
+}
+
+function clearFilters() {
+  ['flt-from','flt-to'].forEach(id=>el(id).value='');
+  ['flt-ep','flt-humor'].forEach(id=>el(id).value='');
+  S.filtered = [...S.allRecords];
+  renderHistory();
+}
+
+/* ─────────────────────────────────────────────
+   RENDER HISTÓRICO
+   ───────────────────────────────────────────── */
+function epChip(v) {
+  if (!v) return '';
+  if (v==='Não') return `<span class="chip c-green">✓ Sem episódio</span>`;
+  if (v.includes('leve'))    return `<span class="chip c-orange">⚠ Leve</span>`;
+  if (v.includes('moderado'))return `<span class="chip c-orange">⚠ Moderado</span>`;
+  if (v.includes('intenso')) return `<span class="chip c-red">🚨 Intenso</span>`;
+  return `<span class="chip c-gray">${esc(v)}</span>`;
+}
+function humorChip(v) {
+  if (!v) return '';
+  const c = (v.includes('tranquila')||v==='Normal') ? 'c-green' : v.includes('Agitada') ? 'c-orange' : 'c-blue';
+  return `<span class="chip ${c}">${esc(v)}</span>`;
+}
+
+function renderHistory() {
+  const list = el('records-list');
+  const sub  = el('hist-sub');
+  const recs = S.filtered;
+  sub.textContent = `${recs.length} registro${recs.length!==1?'s':''} encontrado${recs.length!==1?'s':''}`;
+  if (!recs.length) {
+    list.innerHTML = `<div class="empty"><div class="ei">📋</div><h3>Nenhum registro encontrado</h3><p>Adicione registros pelo formulário ou ajuste os filtros.</p></div>`;
     return;
   }
-  const last = records.slice(-14).reverse();
-  el.innerHTML = `
-    <table>
-      <thead><tr><th>Data</th><th>Dia</th><th>Episódio</th><th>Hora</th><th>Sinais</th><th>Status</th><th>Ação</th></tr></thead>
-      <tbody>
-        ${last.map((r,i)=>`
-          <tr>
-            <td>${escapeHtml(r.data_registro)}</td>
-            <td>${escapeHtml(r.dia_acompanhamento)}</td>
-            <td>${escapeHtml(r.teve_episodio)}</td>
-            <td>${escapeHtml(r.episodio_hora)}</td>
-            <td>${escapeHtml(r.sinais_episodio)}</td>
-            <td>${r.enviado_planilha ? '<span class="pill">planilha</span>' : '<span class="pill">local</span>'}</td>
-            <td><button type="button" class="ghost" onclick="loadLocalRecord(${records.length-1-i})">Editar</button></td>
-          </tr>`).join("")}
-      </tbody>
-    </table>
+  list.innerHTML = recs.map(r => `
+    <div class="rec-card">
+      <div class="rec-header" onclick="toggleDetail('rd-${r.id}')">
+        <div class="rec-datebadge">
+          <div class="rdb-day">${dayNum(r.data_registro)}</div>
+          <div class="rdb-month">${monthStr(r.data_registro)}</div>
+        </div>
+        <div class="rec-info">
+          <h3>${esc(r.dia_acompanhamento||r.data_registro||'—')} &nbsp;·&nbsp; <span style="font-weight:500;color:var(--muted);font-size:.83rem">${esc(r.dia_semana||'')}</span></h3>
+          <div class="rec-meta">${r.responsavel?'👤 '+esc(r.responsavel)+' &nbsp;':''} ${r.data_registro||''}</div>
+          <div class="rec-chips">
+            ${epChip(r.teve_episodio)}
+            ${humorChip(r.humor_dia)}
+            ${r.total_sono?`<span class="chip c-purple">🌙 ${esc(r.total_sono)}</span>`:''}
+            ${r.teve_escola?`<span class="chip c-gray">🏫 ${esc(r.teve_escola)}</span>`:''}
+          </div>
+        </div>
+        <div class="rec-actions">
+          <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();editRecord('${r.id}')">✏️ <span>Editar</span></button>
+          <button class="btn btn-danger btn-sm"    onclick="event.stopPropagation();deleteRecord('${r.id}')">🗑️</button>
+        </div>
+      </div>
+      <div class="rec-detail" id="rd-${r.id}">
+        <div class="detail-grid">
+          ${di('Escola',r.teve_escola)}
+          ${di('Ansiedade',r.nivel_ansiedade)}
+          ${di('Atividade física',r.atividade_fisica)}
+          ${di('Tempo de tela',r.tempo_tela)}
+          ${di('Tipo de tela',r.tela_tipo)}
+          ${di('Foi para cama',r.foi_cama)}
+          ${di('Dormiu às',r.dormiu_hora)}
+          ${di('Acordou às',r.acordou_hora)}
+          ${di('Total de sono',r.total_sono)}
+          ${di('Cochilo',r.cochilo)}
+          ${di('Jantar',r.jantar_quantidade)}
+          ${di('Doce/chocolate',r.doce_chocolate)}
+          ${di('Episódio',r.teve_episodio)}
+          ${di('Hora do episódio',r.episodio_hora)}
+          ${di('Duração',r.episodio_duracao)}
+          ${di('Sinais',r.sinais_episodio)}
+          ${di('Intervenção',r.intervencao)}
+          ${di('Impacto nos pais',r.impacto_pais)}
+          ${r.possivel_gatilho?di('Possível gatilho',r.possivel_gatilho):''}
+          ${r.acao_teste_proximo_dia?di('Ação para amanhã',r.acao_teste_proximo_dia):''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function di(label, val) {
+  if (!val) return '';
+  return `<div><div class="di-label">${esc(label)}</div><div class="di-value">${esc(val)}</div></div>`;
+}
+
+function toggleDetail(id) { el(id)?.classList.toggle('open'); }
+
+/* ─────────────────────────────────────────────
+   RENDER ANÁLISE
+   ───────────────────────────────────────────── */
+function renderAnalytics() {
+  const recs  = S.allRecords;
+  const grid  = el('stats-row');
+  const epDiv = el('analytics-episodes');
+  if (!recs.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="ei">📊</div><h3>Sem dados ainda</h3><p>Adicione registros para ver a análise.</p></div>`;
+    epDiv.innerHTML = '';
+    return;
+  }
+  const total     = recs.length;
+  const comEp     = recs.filter(r=>r.teve_episodio?.startsWith('Sim')).length;
+  const semEp     = recs.filter(r=>r.teve_episodio==='Não').length;
+  const taxaEp    = Math.round(comEp/total*100);
+
+  // Humor mais frequente
+  const hFreq = {}; recs.forEach(r=>{if(r.humor_dia) hFreq[r.humor_dia]=(hFreq[r.humor_dia]||0)+1;});
+  const topHumor = Object.entries(hFreq).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+
+  // Média de sono
+  const sonosMin = recs.map(r=>{
+    if(!r.total_sono||!r.total_sono.includes('h')) return null;
+    const [hh,...rest]=r.total_sono.split('h'); const mm=parseInt((rest[0]||'').replace('min',''))||0;
+    return (parseInt(hh)||0)*60+mm;
+  }).filter(x=>x!==null);
+  const avgSono = sonosMin.length ? (() => {
+    const a=Math.round(sonosMin.reduce((x,y)=>x+y,0)/sonosMin.length);
+    return `${Math.floor(a/60)}h${pad(a%60)}`;
+  })() : '—';
+
+  grid.innerHTML = `
+    <div class="stat-card"><div class="sv">${total}</div><div class="sl">Dias registrados</div></div>
+    <div class="stat-card"><div class="sv" style="color:${taxaEp>50?'var(--danger)':'var(--success)'}">${taxaEp}%</div><div class="sl">Taxa de episódios</div><div class="sd">${comEp} noites com / ${semEp} sem</div></div>
+    <div class="stat-card"><div class="sv">${comEp}</div><div class="sl">Noites com episódio</div></div>
+    <div class="stat-card"><div class="sv">${semEp}</div><div class="sl">Noites tranquilas</div></div>
+    <div class="stat-card"><div class="sv" style="font-size:1.5rem">${avgSono}</div><div class="sl">Média de sono</div></div>
+    <div class="stat-card"><div class="sv" style="font-size:1rem">${esc(topHumor)}</div><div class="sl">Humor mais frequente</div></div>
   `;
-}
-function setEditMode(record){
-  const banner = document.getElementById("editModeBanner");
-  const saveSendBtn = document.getElementById("saveSendBtn");
-  const saveLocalBtn = document.getElementById("saveLocalBtn");
-  const newRecordBtn = document.getElementById("newRecordBtn");
 
-  if(record && record.local_id){
-    editingLocalId = record.local_id;
-    if(banner){
-      banner.className = "status show warn";
-      banner.textContent = `Modo edição ativo: este formulário está vinculado ao registro de ${record.data_registro || "data não informada"}. Ao salvar, a cópia local será atualizada sem duplicar.`;
-    }
-    if(saveSendBtn) saveSendBtn.textContent = "✅ Atualizar e enviar para planilha";
-    if(saveLocalBtn) saveLocalBtn.textContent = "💾 Atualizar somente neste navegador";
-    if(newRecordBtn) newRecordBtn.style.display = "inline-flex";
-    document.getElementById("statusRegistro").textContent = "Editando";
+  const episodios = recs.filter(r=>r.teve_episodio?.startsWith('Sim'));
+  if (episodios.length) {
+    epDiv.innerHTML = `
+      <div class="section" style="margin-top:0">
+        <div class="section-header">
+          <div class="section-icon ico-red">⚠️</div>
+          <div><div class="sec-title">Noites com Episódio (${episodios.length})</div><div class="sec-sub">Detalhes de todas as noites com episódio registradas</div></div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Data</th><th>Intensidade</th><th>Horário</th>
+              <th>Sinais</th><th>Possível Gatilho</th><th>Ação testada</th>
+            </tr></thead>
+            <tbody>
+              ${episodios.map(r=>`<tr>
+                <td><strong>${esc(r.data_registro||'—')}</strong></td>
+                <td>${epChip(r.teve_episodio)}</td>
+                <td>${esc(r.episodio_hora||'—')}</td>
+                <td style="max-width:180px">${esc(r.sinais_episodio||'—')}</td>
+                <td style="max-width:200px">${esc(r.possivel_gatilho||'—')}</td>
+                <td style="max-width:200px">${esc(r.acao_teste_proximo_dia||'—')}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
   } else {
-    editingLocalId = null;
-    if(banner) banner.className = "status";
-    if(saveSendBtn) saveSendBtn.textContent = "✅ Salvar e enviar para planilha";
-    if(saveLocalBtn) saveLocalBtn.textContent = "💾 Salvar somente neste navegador";
-    if(newRecordBtn) newRecordBtn.style.display = "none";
-    document.getElementById("statusRegistro").textContent = "Aberto";
+    epDiv.innerHTML = `<div class="section" style="margin-top:0"><div class="empty"><div class="ei">🌟</div><h3>Nenhum episódio registrado</h3><p>Ótimas notícias por enquanto!</p></div></div>`;
   }
 }
-function loadLocalRecord(index){
-  const records = getRecords();
-  const r = records[index];
-  if(!r) return;
 
-  if(!r.local_id){
-    r.local_id = `${r.data_registro || todayISO()}_${index}_${Date.now()}`;
-    records[index] = r;
-    setRecords(records);
-  }
-
-  fillForm(r);
-  setEditMode(r);
-  showStatus("formStatus","Registro aberto em modo edição. Ao salvar, a cópia local será atualizada no mesmo registro.","ok");
-}
-function csvEscape(v){
-  const s = String(v ?? "");
-  return /[",\n;]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
-}
-function exportLocalCsv(){
-  const records = getRecords();
-  if(!records.length){
-    showStatus("formStatus","Não há registros locais para exportar.","warn");
-    return;
-  }
-  const headers = Array.from(new Set(records.flatMap(r => Object.keys(r))));
-  const csv = [headers.join(",")]
-    .concat(records.map(r => headers.map(h => csvEscape(r[h])).join(",")))
-    .join("\n");
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `diario_sono_maya_${todayISO()}.csv`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-function parseCsv(text){
-  const rows=[]; let row=[], cur="", quote=false;
-  for(let i=0;i<text.length;i++){
-    const c=text[i], n=text[i+1];
-    if(c === '"' && quote && n === '"'){ cur += '"'; i++; continue; }
-    if(c === '"'){ quote = !quote; continue; }
-    if(c === "," && !quote){ row.push(cur); cur=""; continue; }
-    if((c === "\n" || c === "\r") && !quote){
-      if(cur || row.length){ row.push(cur); rows.push(row); row=[]; cur=""; }
-      if(c === "\r" && n === "\n") i++;
-      continue;
-    }
-    cur += c;
-  }
-  if(cur || row.length){ row.push(cur); rows.push(row); }
-  return rows;
-}
-async function loadCsvPreview(){
-  const url = document.getElementById("csvUrl").value.trim();
-  if(!url){
-    showStatus("configStatus","Informe o link CSV publicado da planilha.","warn");
-    return;
-  }
-  try{
-    const resp = await fetch(url);
-    const text = await resp.text();
-    const rows = parseCsv(text);
-    const el = document.getElementById("csvPreview");
-    if(rows.length < 2){
-      el.innerHTML = `<p class="small">A planilha publicada ainda não retornou registros preenchidos.</p>`;
-      showStatus("configStatus","CSV carregado, mas sem linhas de dados.","warn");
-      return;
-    }
-    const headers = rows[0];
-    const last = rows.slice(-8).reverse();
-    el.innerHTML = `
-      <h3>Últimos registros lidos do CSV publicado</h3>
-      <table>
-        <thead><tr>${headers.slice(0,8).map(h=>`<th>${escapeHtml(h)}</th>`).join("")}</tr></thead>
-        <tbody>${last.map(r=>`<tr>${r.slice(0,8).map(c=>`<td>${escapeHtml(c)}</td>`).join("")}</tr>`).join("")}</tbody>
-      </table>
-    `;
-    showStatus("configStatus",`CSV carregado: ${Math.max(rows.length-1,0)} registros encontrados.`, "ok");
-  }catch(err){
-    showStatus("configStatus","Não consegui carregar o CSV. Verifique se o link publicado está ativo.", "err");
-  }
-}
-function addListeners(){
-  ["data_registro","startDate","tela_inicio","tela_fim","dormiu_hora","acordou_hora"].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el) el.addEventListener("input", updateComputedFields);
+/* ─────────────────────────────────────────────
+   EXPORT CSV
+   ───────────────────────────────────────────── */
+function exportCSV() {
+  if (!S.allRecords.length) { toast('Nenhum dado para exportar','warn'); return; }
+  const hdrs = Object.keys(S.allRecords[0]);
+  const csv  = [hdrs, ...S.allRecords.map(r=>hdrs.map(h=>{
+    const v=String(r[h]??''); return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:`${v}`;
+  }))].map(r=>r.join(',')).join('\n');
+  const a = Object.assign(document.createElement('a'),{
+    href: URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'})),
+    download:`diario_sono_maya_${todayISO()}.csv`
   });
-  document.getElementById("teve_episodio").addEventListener("change", () => {
-    document.getElementById("statusRegistro").textContent =
-      document.getElementById("teve_episodio").value.includes("Não") ? "Noite sem episódio" : "Com episódio";
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('CSV exportado!','ok');
+}
+
+/* ─────────────────────────────────────────────
+   TABS
+   ───────────────────────────────────────────── */
+function goTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  el(`tab-${name}`).classList.add('active');
+  el(`panel-${name}`).classList.add('active');
+  if (name==='history')   loadRecords().then(renderHistory);
+  if (name==='analytics') loadRecords().then(renderAnalytics);
+}
+
+/* ─────────────────────────────────────────────
+   TOAST
+   ───────────────────────────────────────────── */
+function toast(msg, type='ok') {
+  const icons = {ok:'✅', err:'❌', warn:'⚠️'};
+  const div = document.createElement('div');
+  div.className = `toast ${type}`;
+  div.innerHTML = `<span>${icons[type]||''}</span><span>${esc(msg)}</span>`;
+  el('toasts').appendChild(div);
+  setTimeout(()=>div.remove(), 4200);
+}
+
+/* ─────────────────────────────────────────────
+   LISTENERS
+   ───────────────────────────────────────────── */
+function addListeners() {
+  ['data_registro','tela_inicio','tela_fim','dormiu_hora','acordou_hora']
+    .forEach(id => { const e=el(id); if(e) e.addEventListener('input', recalc); });
+  el('teve_episodio').addEventListener('change', () => {
+    const v = el('teve_episodio').value;
+    el('m-status').textContent = v==='Não'?'Noite tranquila':v?.startsWith('Sim')?'Com episódio':'Aberto';
   });
 }
-document.addEventListener("DOMContentLoaded", () => {
-  loadSettings();
-  document.getElementById("data_registro").value = todayISO();
+
+/* ─────────────────────────────────────────────
+   INIT
+   ───────────────────────────────────────────── */
+async function init() {
+  el('data_registro').value = todayISO();
   addListeners();
-  updateComputedFields();
-  setEditMode(null);
-  renderLocalRecords();
-});
+  recalc();
+  const ok = await checkConnection();
+  if (ok) {
+    await loadRecords();
+    recalc();
+  }
+}
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
